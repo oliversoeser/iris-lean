@@ -184,15 +184,30 @@ theorem Agree.includedN {x y : Agree α} : x ≼{n} y ↔ y ≡{n}≡ y • x :=
 theorem Agree.included {x y : Agree α} : x ≼ y ↔ y ≡ y • x :=
   ⟨fun ⟨z, h⟩ n => includedN.mp ⟨z, h n⟩, fun h => ⟨y, h.trans op_comm⟩⟩
 
-def Agree.map (f : α → β) (x : Agree α) : Agree β := ⟨
+@[simp] def Agree.map (f : α → β) (x : Agree α) : Agree β := ⟨
   x.car.map f, by
     intro h; simp at h
     apply x.not_nil
     assumption
   ⟩
 
+-- Functors
+omit [OFE α] in
+theorem agree_map_id (x : Agree α) : Agree.map id x = x := by simp
+
+omit [OFE α] in
+theorem agree_map_compose (f : α → β) (g : β → γ) (x : Agree α) :
+  Agree.map (g ∘ f) x = Agree.map g (Agree.map f x) := by simp
+
+theorem agree_map_ne [OFE β] (f : α → β) [OFE.NonExpansive f]: OFE.NonExpansive (Agree.map f) where
+  ne := sorry
+
+theorem agree_map_ext [OFE β] (f g : α → β) x :
+  (∀ a, f a ≡ g a) → Agree.map f x ≡ Agree.map g x := sorry
+
 def agreeO_map [OFE β] (f : α -n> β) : Agree α -C> Agree β :=
-  sorry
+  ⟨⟨Agree.map f, agree_map_ne f⟩, sorry, sorry, sorry⟩
+
 
 abbrev AgreeOF (F : COFE.OFunctorPre) : COFE.OFunctorPre :=
   fun A B _ _ => Agree (F A B)
