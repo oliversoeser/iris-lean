@@ -183,3 +183,26 @@ theorem Agree.includedN {x y : Agree α} : x ≼{n} y ↔ y ≡{n}≡ y • x :=
 
 theorem Agree.included {x y : Agree α} : x ≼ y ↔ y ≡ y • x :=
   ⟨fun ⟨z, h⟩ n => includedN.mp ⟨z, h n⟩, fun h => ⟨y, h.trans op_comm⟩⟩
+
+def Agree.map (f : α → β) (x : Agree α) : Agree β := ⟨
+  x.car.map f, by
+    intro h; simp at h
+    apply x.not_nil
+    assumption
+  ⟩
+
+def agreeO_map [OFE β] (f : α -n> β) : Agree α -C> Agree β :=
+  sorry
+
+abbrev AgreeOF (F : COFE.OFunctorPre) : COFE.OFunctorPre :=
+  fun A B _ _ => Agree (F A B)
+
+instance {F} [COFE.OFunctor F] : RFunctor (AgreeOF F) where
+  cmra := inferInstance
+  map f g := agreeO_map (COFE.OFunctor.map f g)
+  map_ne := sorry
+  map_id := sorry
+  map_comp := sorry
+
+instance {F} [COFE.OFunctorContractive F] : RFunctorContractive (AgreeOF F) where
+  map_contractive := sorry
