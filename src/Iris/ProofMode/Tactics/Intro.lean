@@ -160,42 +160,27 @@ partial def iRevertCore
     {P} (hyps : Hyps bi P) (Q : Q($prop)) (hyp : Ident)
     (k : ∀ {P}, Hyps bi P → (Q : Q($prop)) → MetaM Q(⊢ $P -∗ $Q)) :
     MetaM (Q($P ⊢ $Q)) := do
-  logInfo P
-  let pf ← do
-    let uniq ← hyps.findWithInfo hyp
-    let ⟨e', hyps', out, _, _, _, pf''⟩ := hyps.remove true uniq
-    --let m : Q($e' ⊢ $Q) ← mkFreshExprSyntheticOpaqueMVar <|
-    --  IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := Q, .. }
+  -- remove hypothesis from context
+  let uniq ← hyps.findWithInfo hyp
+  let _ := hyps.remove true uniq
 
-    let pf' ← k hyps Q
-    pure (q($pf') : Q(⊢ $P -∗ $Q))
+  -- since ⊢ P -∗ Q gives P ⊢ Q, make ⊢ P -∗ Q the new goal
+  let pf ← k hyps Q
   return q(wand_entails $pf)
 
 elab "irevert" colGt hyp:ident : tactic => do
   let (mvar, { prop, bi, hyps, goal, .. }) ← istart (← getMainGoal)
 
   mvar.withContext do
-    let goals ← IO.mkRef #[]
+    let goals ← IO.mkRef #[] -- to keep track of new metavariables
     let pf ← iRevertCore bi hyps goal hyp (
       fun {P} hyps goal => do
-      let m : Q(⊢ $P -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <| IrisGoal.toExpr { prop, bi, hyps, goal, .. }
-      goals.modify (·.push m.mvarId!)
-      pure m
+        let m : Q(⊢ $P -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <| IrisGoal.toExpr { prop, bi, hyps, goal, .. }
+        goals.modify (·.push m.mvarId!)
+        pure m
     )
-    logInfo pf
     mvar.assign pf
     replaceMainGoal (← goals.get).toList
-
-/-
-  let uniq ← hyps.findWithInfo hyp
-  let ⟨e', hyps', out, _, _, _, pf⟩ := hyps.remove true uniq
-
-  let m : Q($e' ⊢ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
-    IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal, .. }
-
-  mvar.assign ((← clearCore bi e e' out goal pf).app m)
-  replaceMainGoal [m.mvarId!]
--/
 
 elab "print_goal" : tactic => do
   let mvar ← getMainGoal
