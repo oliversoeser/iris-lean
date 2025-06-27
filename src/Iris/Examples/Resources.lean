@@ -24,6 +24,21 @@ example (P Q : IProp FF0) : P ∗ Q ⊢ ⌜True⌝ := by
   ipure_intro
   trivial
 
+#check ProofMode.Entails'
+#check ProofMode.wand_intro_spatial (ProofMode.of_emp_sep _)
+
+-- Use of `idone`
+example (P : IProp FF0) : P ⊢ ⌜True⌝ := by iintro hp; idone;
+example (P : IProp FF0) : P ⊢ True := by iintro _; idone;
+example (P : IProp FF0) : P ⊢ True ∧ True := by iintro _; idone;
+example (P : IProp FF0) : P ⊢ False ∨ True := by iintro _; idone;
+example (P Q : IProp FF0) : P ⊢ Q → True := by iintro _; idone;
+example (P Q : IProp FF0) : P ⊢ Q → Q := by iintro _; idone;
+example (P Q : IProp FF0) : P ⊢ False → Q := by iintro _; idone;
+
+example (P : IProp FF0) : P ⊢ True := by istart; iintro hp; irevert hp; sorry
+
+
 example (P Q : IProp FF0) : P ∗ Q ⊢ P := by
   iintro ⟨HP, HQ⟩
   iexact HP

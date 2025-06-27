@@ -118,4 +118,12 @@ class FromPure [BI PROP] (a : outParam Bool) (P : PROP) (φ : outParam Prop) whe
   from_pure : <affine>?a ⌜φ⌝ ⊢ P
 export FromPure (from_pure)
 
+class FromTrivial [BI PROP] (P : PROP) where
+  from_trivial : True ⊢ P
+export FromTrivial (from_trivial)
+
+class IntoContradiction [BI PROP] (P : PROP) where
+  into_contradiction : P ⊢ False
+export IntoContradiction (into_contradiction)
+
 end Iris.ProofMode

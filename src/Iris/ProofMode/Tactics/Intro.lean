@@ -115,3 +115,88 @@ elab "iintro" pats:(colGt icasesPat)* : tactic => do
 
   mvar.assign pf
   replaceMainGoal (← goals.get).toList
+
+variable {prop : Q(Type u)} (bi : Q(BI $prop)) in
+partial def iIntroCore'
+    {P} (hyps : Hyps bi P) (Q : Q($prop)) (pats : List iCasesPat)
+    (k : ∀ {P}, Hyps bi P → (Q : Q($prop)) → MetaM Q($P ⊢ $Q)) :
+    MetaM (Q($P ⊢ $Q)) := do
+  let (pat :: []) := pats | throwError "only one pattern allowed"
+  let A1 ← mkFreshExprMVarQ q($prop)
+  let A2 ← mkFreshExprMVarQ q($prop)
+  let _ ← synthInstanceQ q(FromWand $Q $A1 $A2)
+  let pf ← do
+    let .one name := pat | throwError "pattern must be .one name"
+    let (name, ref) ← getFreshName name
+    let uniq ← mkFreshId
+    addHypInfo ref name uniq prop A1 (isBinder := true)
+    let hyp := .mkHyp bi name uniq q(false) A1 A1
+    let .emp _ := hyps | throwError "unused hypotheses"
+    let pf' : Q($A1 ⊢ $A2) ← (k hyp A2)
+    pure (q(of_emp_sep $pf') : Q($P ∗ $A1 ⊢ $A2))
+  return q(wand_intro_spatial (Q := $Q) $pf)
+
+-- In the `iintro hp` example, `pats` is `[.one hp]`
+elab "iintro'" pat:(colGt icasesPat) : tactic => do
+  -- Parse pattern
+  let pat ← liftMacroM <| [pat].mapM <| iCasesPat.parse
+
+  -- Get the metavariable and goal
+  let (mvar, { prop, bi, hyps, goal, ..}) ← istart (← getMainGoal)
+
+  mvar.withContext do
+    let goals ← IO.mkRef #[] -- Keep track of new metavariables
+    let pf ← iIntroCore' bi hyps goal pat (
+      fun {P} hyps goal => do
+      let m : Q($P ⊢ $goal) ← mkFreshExprSyntheticOpaqueMVar <| IrisGoal.toExpr { prop, bi, hyps, goal, .. }
+      goals.modify (·.push m.mvarId!)
+      pure m
+    )
+    mvar.assign pf
+    replaceMainGoal (← goals.get).toList
+
+variable {prop : Q(Type u)} (bi : Q(BI $prop)) in
+partial def iRevertCore
+    {P} (hyps : Hyps bi P) (Q : Q($prop)) (hyp : Ident)
+    (k : ∀ {P}, Hyps bi P → (Q : Q($prop)) → MetaM Q(⊢ $P -∗ $Q)) :
+    MetaM (Q($P ⊢ $Q)) := do
+  logInfo P
+  let pf ← do
+    let uniq ← hyps.findWithInfo hyp
+    let ⟨e', hyps', out, _, _, _, pf''⟩ := hyps.remove true uniq
+    --let m : Q($e' ⊢ $Q) ← mkFreshExprSyntheticOpaqueMVar <|
+    --  IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := Q, .. }
+
+    let pf' ← k hyps Q
+    pure (q($pf') : Q(⊢ $P -∗ $Q))
+  return q(wand_entails $pf)
+
+elab "irevert" colGt hyp:ident : tactic => do
+  let (mvar, { prop, bi, hyps, goal, .. }) ← istart (← getMainGoal)
+
+  mvar.withContext do
+    let goals ← IO.mkRef #[]
+    let pf ← iRevertCore bi hyps goal hyp (
+      fun {P} hyps goal => do
+      let m : Q(⊢ $P -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <| IrisGoal.toExpr { prop, bi, hyps, goal, .. }
+      goals.modify (·.push m.mvarId!)
+      pure m
+    )
+    logInfo pf
+    mvar.assign pf
+    replaceMainGoal (← goals.get).toList
+
+/-
+  let uniq ← hyps.findWithInfo hyp
+  let ⟨e', hyps', out, _, _, _, pf⟩ := hyps.remove true uniq
+
+  let m : Q($e' ⊢ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
+    IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal, .. }
+
+  mvar.assign ((← clearCore bi e e' out goal pf).app m)
+  replaceMainGoal [m.mvarId!]
+-/
+
+elab "print_goal" : tactic => do
+  let mvar ← getMainGoal
+  logInfo (← mvar.getType)

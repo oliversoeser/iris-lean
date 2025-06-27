@@ -549,3 +549,64 @@ instance fromPure_absorbingly (a : Bool) [BI PROP] (P : PROP) (φ : Prop)
     [h : FromPure a P φ] : FromPure false iprop(<absorb> P) φ where
   from_pure := absorbingly_affinely_intro_of_persistent.trans <|
     absorbingly_mono <| affinely_affinelyIf.trans h.1
+
+-- FromTrivial
+instance fromTrivial_true [BI PROP] : FromTrivial (PROP := PROP) iprop(True) := ⟨.rfl⟩
+
+instance fromTrivial_and [BI PROP] (P1 P2 : PROP)
+    [h1 : FromTrivial P1] [h2 : FromTrivial P2] :
+    FromTrivial iprop(P1 ∧ P2) where
+  from_trivial := and_intro h1.1 h2.1
+
+instance fromTrivial_or_l [BI PROP] (P1 P2 : PROP)
+    [h : FromTrivial P1] :
+    FromTrivial iprop(P1 ∨ P2) where
+  from_trivial := or_intro_l' h.1
+
+instance fromTrivial_or_r [BI PROP] (P1 P2 : PROP)
+    [h : FromTrivial P2] :
+    FromTrivial iprop(P1 ∨ P2) where
+  from_trivial := or_intro_r' h.1
+
+instance fromTrivial_imp [BI PROP] (P : PROP) : FromTrivial iprop(P → P) where
+  from_trivial := by exact BI.imp_self
+
+instance fromTrivial_imp_trivial [BI PROP] (P1 P2 : PROP)
+    [h : FromTrivial P2] : FromTrivial iprop(P1 → P2) where
+  from_trivial := imp_intro' (and_elim_r' h.1)
+
+instance fromTrivial_contra_imp [BI PROP] (P1 P2 : PROP)
+    [h : IntoContradiction P1] : FromTrivial iprop(P1 → P2) where
+  from_trivial := imp_intro' (and_elim_l' (BIBase.Entails.trans h.1 false_elim))
+/-
+instance fromTrivial_exists [BI PROP] (Φ : α → PROP)
+    [h : ∀ a, FromTrivial iprop(Φ a)] : FromTrivial iprop(∃ a, Φ a) where
+  from_trivial := exists_intro' sorry sorry
+-/
+instance fromTrivial_forall [BI PROP] (Φ : α → PROP)
+    [h : ∀ a, FromTrivial iprop(Φ a)] : FromTrivial iprop(∀ a, Φ a) where
+  from_trivial := forall_intro (fun _ => from_trivial)
+/-
+instance fromTrivial_wand [BI PROP] (P1 P2 : PROP)
+    [h : FromTrivial P2] : FromTrivial iprop(P1 -∗ P2) where
+  from_trivial := wand_intro sorry
+
+instance fromTrivial_absorbingly [BI PROP] (P : PROP)
+    [h : FromTrivial P] : FromTrivial iprop(<absorb> P) where
+  from_trivial := sorry
+-/
+-- IntoContradiction
+instance intoContradiction_false [BI PROP] : IntoContradiction (PROP := PROP) iprop(False) := ⟨.rfl⟩
+
+instance intoContradiction_and_l [BI PROP] (P1 P2 : PROP)
+    [h : IntoContradiction P1] : IntoContradiction iprop(P1 ∧ P2) where
+  into_contradiction := and_elim_l' h.1
+
+instance intoContradiction_and_r [BI PROP] (P1 P2 : PROP)
+    [h : IntoContradiction P2] : IntoContradiction iprop(P1 ∧ P2) where
+  into_contradiction := and_elim_r' h.1
+
+instance intoContradiction_or [BI PROP] (P1 P2 : PROP)
+    [h1 : IntoContradiction P1] [h2 : IntoContradiction P2] :
+    IntoContradiction iprop(P1 ∨ P2) where
+  into_contradiction := or_elim h1.1 h2.1

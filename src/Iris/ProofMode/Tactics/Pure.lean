@@ -104,3 +104,20 @@ elab "ipure_intro" : tactic => do
     mvar.assign q(pure_intro_spatial (P := $e) (Q := $goal) $m)
   | _ => throwError "failed to prove `FromPure _ {goal} _`"
   replaceMainGoal [m.mvarId!]
+
+theorem trivial_intro [BI PROP] {Q : PROP}
+  [h : FromTrivial Q] : P ⊢ Q :=
+  (pure_intro trivial).trans h.1
+
+elab "idone" : tactic => do
+  let (mvar, { e, goal, .. }) ← istart (← getMainGoal)
+  mvar.withContext do
+    let _ ← synthInstanceQ q(FromTrivial $goal)
+    let m ← mkFreshExprMVar (Expr.const ``True [])
+
+    mvar.assign q(trivial_intro (P := $e) (Q := $goal))
+    replaceMainGoal [m.mvarId!]
+
+    match_expr ← m.mvarId!.getType with
+    | True => m.mvarId!.assign (.const ``trivial [])
+    | _ => throwError "Goal must be of type `iprop(True)`"
