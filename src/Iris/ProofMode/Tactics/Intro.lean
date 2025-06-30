@@ -155,33 +155,16 @@ elab "iintro'" pat:(colGt icasesPat) : tactic => do
     mvar.assign pf
     replaceMainGoal (← goals.get).toList
 
-variable {prop : Q(Type u)} (bi : Q(BI $prop)) in
-partial def iRevertCore
-    {P} (hyps : Hyps bi P) (Q : Q($prop)) (hyp : Ident)
-    (k : ∀ {P}, Hyps bi P → (Q : Q($prop)) → MetaM Q(⊢ $P -∗ $Q)) :
-    MetaM (Q($P ⊢ $Q)) := do
-  -- remove hypothesis from context
-  let uniq ← hyps.findWithInfo hyp
-  let _ := hyps.remove true uniq
-
-  -- since ⊢ P -∗ Q gives P ⊢ Q, make ⊢ P -∗ Q the new goal
-  let pf ← k hyps Q
-  return q(wand_entails $pf)
-
 elab "irevert" colGt hyp:ident : tactic => do
-  let (mvar, { prop, bi, hyps, goal, .. }) ← istart (← getMainGoal)
+  let (mvar, { u, prop, bi, e, hyps, goal, .. }) ← istart (← getMainGoal)
 
   mvar.withContext do
-    let goals ← IO.mkRef #[] -- to keep track of new metavariables
-    let pf ← iRevertCore bi hyps goal hyp (
-      fun {P} hyps goal => do
-        let m : Q(⊢ $P -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <| IrisGoal.toExpr { prop, bi, hyps, goal, .. }
-        goals.modify (·.push m.mvarId!)
-        pure m
-    )
-    mvar.assign pf
-    replaceMainGoal (← goals.get).toList
+    let uniq ← hyps.findWithInfo hyp
+    let ⟨e', hyps', _, _, _, _, _⟩ := hyps.remove true uniq
 
-elab "print_goal" : tactic => do
-  let mvar ← getMainGoal
-  logInfo (← mvar.getType)
+    let m : Q($e' ⊢ $e -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
+      IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := ← mkAppM ``BIBase.wand #[e, goal], .. }
+
+    let pf : Q($e ⊢ $goal) ← mkAppM ``wand_entails #[m]
+    mvar.assign pf
+    replaceMainGoal [m.mvarId!]
