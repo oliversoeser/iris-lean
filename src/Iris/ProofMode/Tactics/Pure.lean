@@ -105,8 +105,8 @@ elab "ipure_intro" : tactic => do
   | _ => throwError "failed to prove `FromPure _ {goal} _`"
   replaceMainGoal [m.mvarId!]
 
-theorem trivial_intro [BI PROP] {Q : PROP}
-  [h : FromTrivial Q] : P ⊢ Q :=
+theorem trivial_intro [BI PROP] (P Q : PROP)
+    [h : FromTrivial Q] : P ⊢ Q :=
   (pure_intro trivial).trans h.1
 
 elab "idone" : tactic => do
@@ -115,7 +115,10 @@ elab "idone" : tactic => do
     let _ ← synthInstanceQ q(FromTrivial $goal)
     let m ← mkFreshExprMVar (Expr.const ``True [])
 
-    mvar.assign q(trivial_intro (P := $e) (Q := $goal))
+    let pf : Q($e ⊢ $goal) := q(trivial_intro $e $goal)
+
+    -- if (← isDefEq (mkMVar mvar) pf) then logInfo "isDefEq success" is successful
+    mvar.assign pf -- Source of kernel application type error
     replaceMainGoal [m.mvarId!]
 
     match_expr ← m.mvarId!.getType with
