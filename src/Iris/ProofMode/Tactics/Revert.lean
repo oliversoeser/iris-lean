@@ -13,13 +13,14 @@ elab "irevert" colGt hyp:ident : tactic => do
 
   mvar.withContext do
     let uniq ← hyps.findWithInfo hyp
-    let ⟨e', hyps', _, _, _, _, _⟩ := hyps.remove true uniq
-    let m : Q($e' ⊢ $e -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
-      IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := ← mkAppM ``BIBase.wand #[e, goal], .. }
+    let ⟨e', hyps', out, _, _, _, h⟩ := hyps.remove true uniq
+    let m : Q($e' ⊢ $out -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
+      IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := ← mkAppM ``BIBase.wand #[out, goal], .. }
 
-    let pf : Q($e ⊢ $goal) ← mkAppM ``wand_elim #[m]
+    let pf' : Q($e' ∗ $out ⊢ $goal) ← mkAppM ``wand_elim #[m]
+    let h' : Q($e ⊢ $e' ∗ $out) ← mkAppM ``BIBase.BiEntails.mp #[h]
+
+    let pf : Q($e ⊢ $goal) ← mkAppM ``BIBase.Entails.trans #[h', pf']
+
     mvar.assign pf
     replaceMainGoal [m.mvarId!]
-
-#check wand_entails
-#check wand_elim

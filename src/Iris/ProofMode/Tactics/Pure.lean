@@ -117,10 +117,10 @@ elab "idone" : tactic => do
 
     let pf : Q($e ⊢ $goal) := q(trivial_intro $e $goal)
 
-    -- if (← isDefEq (mkMVar mvar) pf) then logInfo "isDefEq success" is successful
-    mvar.assign pf -- Source of kernel application type error
+    mvar.assign pf
     replaceMainGoal [m.mvarId!]
 
+    -- Is this not redundant? Should the check not come earlier?
     match_expr ← m.mvarId!.getType with
     | True => m.mvarId!.assign (.const ``trivial [])
     | _ => throwError "Goal must be of type `iprop(True)`"
