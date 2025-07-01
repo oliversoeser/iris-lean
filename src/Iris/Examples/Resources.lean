@@ -34,6 +34,7 @@ example (P Q : IProp FF0) : P ⊢ Q → Q := by iintro _; idone;
 example (P Q : IProp FF0) : P ⊢ False → Q := by iintro _; idone;
 
 example (P : IProp FF0) : P ⊢ True := by istart; iintro hp; irevert hp; iintro _; idone;
+example (P : IProp FF0) : □ P ⊢ True := by istart; iintro □hp; irevert hp; iintro _; idone;
 
 example (P Q : IProp FF0) : P ∗ Q ⊢ P := by
   iintro ⟨HP, HQ⟩

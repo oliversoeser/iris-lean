@@ -17,10 +17,7 @@ elab "irevert" colGt hyp:ident : tactic => do
     let m : Q($e' ⊢ $out -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
       IrisGoal.toExpr { u, prop, bi, hyps := hyps', goal := ← mkAppM ``BIBase.wand #[out, goal], .. }
 
-    let pf' : Q($e' ∗ $out ⊢ $goal) ← mkAppM ``wand_elim #[m]
-    let h' : Q($e ⊢ $e' ∗ $out) ← mkAppM ``BIBase.BiEntails.mp #[h]
-
-    let pf : Q($e ⊢ $goal) ← mkAppM ``BIBase.Entails.trans #[h', pf']
+    let pf : Q($e ⊢ $goal) := q((BIBase.BiEntails.mp $h).trans (wand_elim $m))
 
     mvar.assign pf
     replaceMainGoal [m.mvarId!]
