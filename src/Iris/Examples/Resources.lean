@@ -27,8 +27,7 @@ example (P Q : IProp FF0) : P ∗ Q ⊢ ⌜True⌝ := by
 section idone
 
 -- `idone` proves the goal if it is a (very) simple tautology
-variable (P Q R S : IProp FF0)
-variable (Φ : α → IProp FF0)
+variable (P Q : IProp FF0)
 
 example : P ⊢ ⌜True⌝ := by idone;
 example : P ⊢ True := by idone;
@@ -42,17 +41,11 @@ example : P ⊢ False → Q := by idone;
 -- wand spatial
 example : ⊢ P -∗ True := by iintro hp; irevert hp; iintro _; idone;
 
--- wand intuitionistic - in progress
-example : ⊢ □ P -∗ True := by istart; iintro □hp; irevert hp; iintro _; idone;
-
--- imp spatial - todo
-example : ⊢ P → True := by iintro hp; irevert hp; sorry
-
--- imp intuitionistic - todo
-example : ⊢ □ P → True := by iintro □hp; irevert hp; sorry
+-- wand intuitionistic
+example : ⊢ □ P -∗ True := by istart; iintro □hp; irevert hp; iintro □hp; idone;
 
 -- forall - in progress
-example (hp : ⊢ P) : ⊢ ∀ (_ : Nat), P := by iintro v; irevert v; iintro _; exact hp;
+example (hp : ⊢ P) : ⊢ ∀ (_ : Nat), P := by iintro x; irevert x; iintro x; exact hp;
 
 end idone
 

@@ -9,12 +9,12 @@ namespace Iris.ProofMode
 open Lean Elab Tactic Meta Qq BI Std
 
 theorem wand_revert_spatial [BI PROP] {P Q A1 A2 : PROP}
-    [h1 : IntoSep P A1 A2] [h2 : IntoWand false false A1 A2 Q] : P ⊢ Q :=
-  h1.1.trans (wand_elim h2.1)
+    (h1 : P ⊣⊢ A1 ∗ A2) (h2 : A1 ⊢ A2 -∗ Q) : P ⊢ Q :=
+  h1.mp.trans (wand_elim h2)
 
 theorem forall_revert [BI PROP] {P : PROP} {Ψ : α → PROP}
-    [h : IntoForall P Ψ] : ∀ a, P ⊢ Ψ a :=
-  λ a => h.1.trans (forall_elim a)
+    (h : P ⊢ ∀ x, Ψ x) : ∀ a, P ⊢ Ψ a :=
+  λ a => h.trans (forall_elim a)
 
 elab "irevert" colGt hyp:ident : tactic => do
   let (mvar, { u, prop, bi, e, hyps, goal, .. }) ← istart (← getMainGoal)
@@ -27,10 +27,7 @@ elab "irevert" colGt hyp:ident : tactic => do
       let m : Q($e' ⊢ $out -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
         IrisGoal.toExpr { hyps := hyps', goal := q(wand $out $goal), .. }
 
-      let _ : Q(IntoSep $e $e' $out) := q(IntoSep.mk (BIBase.BiEntails.mp $h))
-      let _ : Q(IntoWand false false $e' $out $goal) := q(IntoWand.mk $m)
-
-      let pf : Q($e ⊢ $goal) := q(wand_revert_spatial)
+      let pf : Q($e ⊢ $goal) := q(wand_revert_spatial $h $m)
 
       mvar.assign pf
       replaceMainGoal [m.mvarId!]
@@ -38,17 +35,22 @@ elab "irevert" colGt hyp:ident : tactic => do
       let f ← getFVarId hyp
       let lctx ← getLCtx
       let (some ldecl) := (lctx.find? f) | throwError "given identifier does not exist in context"
-      let α : Q(Type) := q(Nat) -- problem 1: type is hardcoded
-      let Φ : Q($α → $prop) := q(fun _ => $goal)
 
-      let m : Q($e ⊢ ∀ (_ : $α), $goal) ← mkFreshExprSyntheticOpaqueMVar <|
-        IrisGoal.toExpr { u, prop, bi, hyps, goal := q(BIBase.forall $Φ), ..}
+      -- todo: case for Prop
+      let αType := ldecl.type
+      let v ← Meta.getLevel αType
 
-      let (_, mvarId) ← mvar.revert #[f] -- problem 2: f is removed from the context here, but this does not last
+      let (_, mvarId) ← mvar.revert #[f]
+      mvarId.withContext do
+        let Φ ← mapForallTelescope' (λ t _ => do
+          logInfo t
+          let (some ig) := parseIrisGoal? t | throwError ""
+          return ig.goal
+        ) (Expr.mvar mvarId)
+        let m ← mkFreshExprSyntheticOpaqueMVar <|
+          IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``BI.forall [u, v]) #[prop, mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi], αType, Φ], ..}
 
-      let _ : Q(IntoForall $e $Φ) := q(IntoForall.mk $m)
+        let pf := mkAppN (mkConst ``forall_revert [u, v]) #[prop, αType, bi, e, Φ, m]
 
-      let pf : Q(∀ (_ : $α), $e ⊢ $goal) := q(forall_revert)
-
-      mvarId.assign pf
-      replaceMainGoal [m.mvarId!]
+        mvarId.assign pf
+        replaceMainGoal [m.mvarId!]
