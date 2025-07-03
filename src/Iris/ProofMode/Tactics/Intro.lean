@@ -56,6 +56,7 @@ partial def iIntroCore
     let fromImp ← try? (α := Q(FromImp $Q $A1 $A2)) do
       synthInstanceQ q(FromImp $Q $A1 $A2)
     if let (.clear, some _) := (pat, fromImp) then
+      logInfo "imp drop"
       let pf ← iIntroCore hyps A2 pats k
       return q(imp_intro_drop (Q := $Q) $pf)
     else
@@ -67,6 +68,7 @@ partial def iIntroCore
       let Φ ← mkFreshExprMVarQ q($α → $prop)
       Pure.pure ⟨n, v, α, Φ, ← synthInstanceQ q(FromForall $Q $Φ)⟩
     if let some ⟨n, _, α, Φ, _⟩ := alres then
+      logInfo "forall"
       let (n, ref) ← getFreshName n
       withLocalDeclDQ n α fun x => do
         addLocalVarInfo ref (← getLCtx) x α
@@ -78,21 +80,25 @@ partial def iIntroCore
     let B ← mkFreshExprMVarQ q($prop)
     match pat, fromImp with
     | .intuitionistic pat, some _ =>
+      logInfo "imp intuitionistic"
       let _ ← synthInstanceQ q(IntoPersistently false $A1 $B)
       let pf ← iCasesCore bi hyps A2 q(true) q(iprop(□ $B)) B ⟨⟩ pat (iIntroCore · A2 pats k)
       return q(imp_intro_intuitionistic (Q := $Q) $pf)
     | .intuitionistic pat, none =>
+      logInfo "wand intuitionistic"
       let _ ← synthInstanceQ q(FromWand $Q $A1 $A2)
       let _ ← synthInstanceQ q(IntoPersistently false $A1 $B)
       let _ ← synthInstanceQ q(TCOr (Affine $A1) (Absorbing $A2))
       let pf ← iCasesCore bi hyps A2 q(true) q(iprop(□ $B)) B ⟨⟩ pat (iIntroCore · A2 pats k)
       return q(wand_intro_intuitionistic (Q := $Q) $pf)
     | _, some _ =>
+      logInfo "imp spatial"
       let _ ← synthInstanceQ q(FromAffinely $B $A1)
       let _ ← synthInstanceQ q(TCOr (Persistent $A1) (Intuitionistic $P))
       let pf ← iCasesCore bi hyps A2 q(false) B B ⟨⟩ pat (iIntroCore · A2 pats k)
       return q(imp_intro_spatial (Q := $Q) $pf)
     | _, none =>
+      logInfo "wand spatial"
       let _ ← synthInstanceQ q(FromWand $Q $A1 $A2)
       let pf ← iCasesCore bi hyps A2 q(false) A1 A1 ⟨⟩ pat (iIntroCore · A2 pats k)
       return q(wand_intro_spatial (Q := $Q) $pf)

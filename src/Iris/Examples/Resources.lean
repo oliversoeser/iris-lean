@@ -24,17 +24,37 @@ example (P Q : IProp FF0) : P ∗ Q ⊢ ⌜True⌝ := by
   ipure_intro
   trivial
 
--- Use of `idone`
-example (P : IProp FF0) : P ⊢ ⌜True⌝ := by iintro hp; idone;
-example (P : IProp FF0) : P ⊢ True := by iintro _; idone;
-example (P : IProp FF0) : P ⊢ True ∧ True := by iintro _; idone;
-example (P : IProp FF0) : P ⊢ False ∨ True := by iintro _; idone;
-example (P Q : IProp FF0) : P ⊢ Q → True := by iintro _; idone;
-example (P Q : IProp FF0) : P ⊢ Q → Q := by iintro _; idone;
-example (P Q : IProp FF0) : P ⊢ False → Q := by iintro _; idone;
+section idone
 
-example (P : IProp FF0) : P ⊢ True := by istart; iintro hp; irevert hp; iintro _; idone;
-example (P : IProp FF0) : □ P ⊢ True := by istart; iintro □hp; irevert hp; iintro _; idone;
+-- `idone` proves the goal if it is a (very) simple tautology
+variable (P Q R S : IProp FF0)
+variable (Φ : α → IProp FF0)
+
+example : P ⊢ ⌜True⌝ := by idone;
+example : P ⊢ True := by idone;
+example : P ⊢ True ∧ True := by idone;
+example : P ⊢ False ∨ True := by idone;
+example : P ⊢ Q → True := by idone;
+example : P ⊢ Q → Q := by idone;
+example : P ⊢ False → Q := by idone;
+
+-- `irevert` tests
+-- wand spatial
+example : ⊢ P -∗ True := by iintro hp; irevert hp; iintro _; idone;
+
+-- wand intuitionistic - in progress
+example : ⊢ □ P -∗ True := by istart; iintro □hp; irevert hp; iintro _; idone;
+
+-- imp spatial - todo
+example : ⊢ P → True := by iintro hp; irevert hp; sorry
+
+-- imp intuitionistic - todo
+example : ⊢ □ P → True := by iintro □hp; irevert hp; sorry
+
+-- forall - in progress
+example (hp : ⊢ P) : ⊢ ∀ (_ : Nat), P := by iintro v; irevert v; iintro _; exact hp;
+
+end idone
 
 example (P Q : IProp FF0) : P ∗ Q ⊢ P := by
   iintro ⟨HP, HQ⟩

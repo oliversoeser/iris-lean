@@ -110,6 +110,7 @@ theorem trivial_intro [BI PROP] (P Q : PROP)
   (pure_intro trivial).trans h.1
 
 -- TODO: Refactor
+-- TODO: Register with `trivial`
 elab "idone" : tactic => do
   let (mvar, { e, goal, .. }) ← istart (← getMainGoal)
   mvar.withContext do

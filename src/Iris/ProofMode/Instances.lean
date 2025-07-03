@@ -568,8 +568,9 @@ instance fromTrivial_or_r [BI PROP] (P1 P2 : PROP)
     FromTrivial iprop(P1 ∨ P2) where
   from_trivial := or_intro_r' h.1
 
+-- TODO: Generalize this
 instance fromTrivial_imp [BI PROP] (P : PROP) : FromTrivial iprop(P → P) where
-  from_trivial := by exact BI.imp_self
+  from_trivial := BI.imp_self
 
 instance fromTrivial_imp_trivial [BI PROP] (P1 P2 : PROP)
     [h : FromTrivial P2] : FromTrivial iprop(P1 → P2) where
@@ -586,11 +587,12 @@ instance fromTrivial_exists [BI PROP] (Φ : α → PROP)
 instance fromTrivial_forall [BI PROP] (Φ : α → PROP)
     [h : ∀ a, FromTrivial iprop(Φ a)] : FromTrivial iprop(∀ a, Φ a) where
   from_trivial := forall_intro (fun _ => from_trivial)
-/-
+
 instance fromTrivial_wand [BI PROP] (P1 P2 : PROP)
     [h : FromTrivial P2] : FromTrivial iprop(P1 -∗ P2) where
-  from_trivial := wand_intro sorry
+  from_trivial := wand_intro (true_intro.trans h.1)
 
+/-
 instance fromTrivial_absorbingly [BI PROP] (P : PROP)
     [h : FromTrivial P] : FromTrivial iprop(<absorb> P) where
   from_trivial := sorry
