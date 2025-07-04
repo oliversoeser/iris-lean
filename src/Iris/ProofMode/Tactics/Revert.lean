@@ -36,13 +36,14 @@ elab "irevert" colGt hyp:ident : tactic => do
       replaceMainGoal [m.mvarId!]
     else
       let f ← getFVarId hyp
-      let (some ldecl) := ((← getLCtx).find? f) | throwError "given identifier does not exist in context"
+      let (some ldecl) := ((← getLCtx).find? f) | throwError "unknown identifier"
+
+      let bibase := mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi]
 
       let φ := ldecl.type
       let (_, mvarId) ← mvar.revert #[f]
       mvarId.withContext do
         if ← Meta.isProp φ then
-          let bibase := mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi]
           let p := mkAppN (mkConst ``BI.pure [u]) #[prop, bibase, φ]
 
           let m ← mkFreshExprSyntheticOpaqueMVar <|
@@ -55,11 +56,11 @@ elab "irevert" colGt hyp:ident : tactic => do
         else
           let v ← Meta.getLevel φ
           let Φ ← mapForallTelescope' (λ t _ => do
-            let (some ig) := parseIrisGoal? t | throwError "failed to parse iris goal"
+            let (some ig) := parseIrisGoal? t | throwError "not in proof mode"
             return ig.goal
           ) (Expr.mvar mvarId)
           let m ← mkFreshExprSyntheticOpaqueMVar <|
-            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``BI.forall [u, v]) #[prop, mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi], φ, Φ], ..}
+            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``BI.forall [u, v]) #[prop, bibase, φ, Φ], ..}
 
           let pf := mkAppN (mkConst ``forall_revert [u, v]) #[prop, φ, bi, e, Φ, m]
 
