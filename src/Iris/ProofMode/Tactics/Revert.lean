@@ -16,6 +16,10 @@ theorem forall_revert [BI PROP] {P : PROP} {Ψ : α → PROP}
     (h : P ⊢ ∀ x, Ψ x) : ∀ x, P ⊢ Ψ x :=
   λ x => h.trans (forall_elim x)
 
+theorem pure_revert [BI PROP] {P Q : PROP} {φ : Prop}
+    (h : P ⊢ ⌜φ⌝ -∗ Q) : φ → P ⊢ Q :=
+  λ hp => (sep_emp.mpr.trans (sep_mono .rfl (pure_intro hp))).trans (wand_elim h)
+
 elab "irevert" colGt hyp:ident : tactic => do
   let (mvar, { u, prop, bi, e, hyps, goal, .. }) ← istart (← getMainGoal)
 
@@ -41,7 +45,16 @@ elab "irevert" colGt hyp:ident : tactic => do
       if ← Meta.isProp αType then
         let (_, mvarId) ← mvar.revert #[f]
         mvarId.withContext do
-          logInfo (← mvarId.getType)
+          let φ := αType
+          let p := mkApp (mkConst ``BI.pure [u]) φ
+
+          let m ← mkFreshExprSyntheticOpaqueMVar <|
+            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``wand [u]) #[p, goal], .. }
+
+          let pf := mkApp (mkConst ``pure_revert [u]) m
+
+          mvarId.assign pf
+          replaceMainGoal [m.mvarId!]
       else
         let v ← Meta.getLevel αType
         let (_, mvarId) ← mvar.revert #[f]
