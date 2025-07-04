@@ -40,23 +40,22 @@ elab "irevert" colGt hyp:ident : tactic => do
       let lctx ← getLCtx
       let (some ldecl) := (lctx.find? f) | throwError "given identifier does not exist in context"
 
-      -- todo: case for Prop
-      let αType := ldecl.type
-      if ← Meta.isProp αType then
+      let φ := ldecl.type
+      if ← Meta.isProp φ then
         let (_, mvarId) ← mvar.revert #[f]
         mvarId.withContext do
-          let φ := αType
-          let p := mkApp (mkConst ``BI.pure [u]) φ
+          let bib := mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi]
+          let p := mkAppN (mkConst ``BI.pure [u]) #[prop, bib, φ]
 
           let m ← mkFreshExprSyntheticOpaqueMVar <|
-            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``wand [u]) #[p, goal], .. }
+            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``wand [u]) #[prop, bib, p, goal], .. }
 
-          let pf := mkApp (mkConst ``pure_revert [u]) m
+          let pf := mkAppN (mkConst ``pure_revert [u]) #[prop, bi, e, goal, φ, m]
 
           mvarId.assign pf
           replaceMainGoal [m.mvarId!]
       else
-        let v ← Meta.getLevel αType
+        let v ← Meta.getLevel φ
         let (_, mvarId) ← mvar.revert #[f]
         mvarId.withContext do
           let Φ ← mapForallTelescope' (λ t _ => do
@@ -64,9 +63,9 @@ elab "irevert" colGt hyp:ident : tactic => do
             return ig.goal
           ) (Expr.mvar mvarId)
           let m ← mkFreshExprSyntheticOpaqueMVar <|
-            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``BI.forall [u, v]) #[prop, mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi], αType, Φ], ..}
+            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``BI.forall [u, v]) #[prop, mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi], φ, Φ], ..}
 
-          let pf := mkAppN (mkConst ``forall_revert [u, v]) #[prop, αType, bi, e, Φ, m]
+          let pf := mkAppN (mkConst ``forall_revert [u, v]) #[prop, φ, bi, e, Φ, m]
 
           mvarId.assign pf
           replaceMainGoal [m.mvarId!]
