@@ -24,8 +24,7 @@ elab "irevert" colGt hyp:ident : tactic => do
   let (mvar, { u, prop, bi, e, hyps, goal, .. }) ← istart (← getMainGoal)
 
   mvar.withContext do
-    -- checks if the identifier exists in the iris context
-    let uniq? ← try? do Pure.pure (← hyps.findWithInfo hyp)
+    let uniq? ← try? do pure (← hyps.findWithInfo hyp)
     if let (some uniq) := uniq? then
       let ⟨e', hyps', out, _, _, _, h⟩ := hyps.remove true uniq
       let m : Q($e' ⊢ $out -∗ $goal) ← mkFreshExprSyntheticOpaqueMVar <|
@@ -37,27 +36,24 @@ elab "irevert" colGt hyp:ident : tactic => do
       replaceMainGoal [m.mvarId!]
     else
       let f ← getFVarId hyp
-      let lctx ← getLCtx
-      let (some ldecl) := (lctx.find? f) | throwError "given identifier does not exist in context"
+      let (some ldecl) := ((← getLCtx).find? f) | throwError "given identifier does not exist in context"
 
       let φ := ldecl.type
-      if ← Meta.isProp φ then
-        let (_, mvarId) ← mvar.revert #[f]
-        mvarId.withContext do
-          let bib := mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi]
-          let p := mkAppN (mkConst ``BI.pure [u]) #[prop, bib, φ]
+      let (_, mvarId) ← mvar.revert #[f]
+      mvarId.withContext do
+        if ← Meta.isProp φ then
+          let bibase := mkAppN (mkConst ``BI.toBIBase [u]) #[prop, bi]
+          let p := mkAppN (mkConst ``BI.pure [u]) #[prop, bibase, φ]
 
           let m ← mkFreshExprSyntheticOpaqueMVar <|
-            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``wand [u]) #[prop, bib, p, goal], .. }
+            IrisGoal.toExpr { u, prop, bi, hyps, goal := mkAppN (mkConst ``wand [u]) #[prop, bibase, p, goal], .. }
 
           let pf := mkAppN (mkConst ``pure_revert [u]) #[prop, bi, e, goal, φ, m]
 
           mvarId.assign pf
           replaceMainGoal [m.mvarId!]
-      else
-        let v ← Meta.getLevel φ
-        let (_, mvarId) ← mvar.revert #[f]
-        mvarId.withContext do
+        else
+          let v ← Meta.getLevel φ
           let Φ ← mapForallTelescope' (λ t _ => do
             let (some ig) := parseIrisGoal? t | throwError "failed to parse iris goal"
             return ig.goal
