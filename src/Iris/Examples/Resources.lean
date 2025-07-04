@@ -42,10 +42,13 @@ example : P ⊢ False → Q := by idone;
 example : ⊢ P -∗ True := by iintro hp; irevert hp; iintro _; idone;
 
 -- wand intuitionistic
-example : ⊢ □ P -∗ True := by istart; iintro □hp; irevert hp; iintro □hp; idone;
+example : ⊢ □ P -∗ True := by iintro □hp; irevert hp; iintro □hp; idone;
 
--- forall - in progress
+-- forall
 example (hp : ⊢ P) : ⊢ ∀ (_ : Nat), P := by iintro x; irevert x; iintro x; exact hp;
+
+-- pure
+example {φ : Prop} (hp : ⊢ P) : ⌜φ⌝ ⊢ P := by istart; iintro %h; irevert h; iintro %h; exact hp;
 
 end idone
 
