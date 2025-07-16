@@ -11,6 +11,11 @@ open Iris.BI
 
 /- This file contains tests with various scenarios for all available tactics. -/
 
+theorem test [BI PROP] (P Q : PROP) : P ⊢ Q := by
+  istart
+  iauto
+  sorry
+
 -- start stop
 theorem start_stop [BI PROP] (Q : PROP) (H : Q ⊢ Q) : Q ⊢ Q := by
   istart
