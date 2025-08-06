@@ -1,0 +1,13 @@
+{"log":
+ [{"message": "Documentation indexing", "level": "info"},
+  {"message":
+   ".> /Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4 index --build /Users/oliver/git/iris-lean/docbuild/.lake/build",
+   "level": "trace"}],
+ "inputs":
+ [["/Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
+   "8370956316283772175"],
+  ["<nil>", "14590866244655749218"],
+  ["<collection>",
+   [["/Users/oliver/git/iris-lean/docbuild/.lake/build/doc/Iris.html",
+     "328123958371228446"]]]],
+ "depHash": "9192768638676179669"}
