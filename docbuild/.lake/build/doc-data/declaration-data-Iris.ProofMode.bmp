@@ -1,0 +1,1 @@
+{"name":"Iris.ProofMode","instances":[],"imports":["Init","Iris.ProofMode.Classes","Iris.ProofMode.Display","Iris.ProofMode.Expr","Iris.ProofMode.Instances","Iris.ProofMode.Patterns","Iris.ProofMode.Tactics","Iris.ProofMode.UnifHints"],"declarations":[]}

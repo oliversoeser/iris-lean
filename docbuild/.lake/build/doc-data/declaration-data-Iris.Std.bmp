@@ -1,0 +1,1 @@
+{"name":"Iris.Std","instances":[],"imports":["Init","Iris.Std.Classes","Iris.Std.Expr","Iris.Std.Nat","Iris.Std.Prod","Iris.Std.Qq","Iris.Std.Rewrite","Iris.Std.Tactic","Iris.Std.TC","Iris.Std.Try"],"declarations":[]}

@@ -1,0 +1,1 @@
+{"name":"Iris.BI","instances":[],"imports":["Init","Iris.BI.Classes","Iris.BI.DerivedLaws","Iris.BI.Extensions","Iris.BI.Instances","Iris.BI.BI","Iris.BI.Notation","Iris.BI.Updates"],"declarations":[]}

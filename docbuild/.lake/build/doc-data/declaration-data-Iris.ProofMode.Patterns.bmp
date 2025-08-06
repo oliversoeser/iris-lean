@@ -1,0 +1,1 @@
+{"name":"Iris.ProofMode.Patterns","instances":[],"imports":["Init","Iris.ProofMode.Patterns.CasesPattern"],"declarations":[]}

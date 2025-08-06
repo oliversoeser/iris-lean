@@ -1,0 +1,16 @@
+{"log":
+ [{"message":
+   ".> ELAN=elan ELAN_HOME=/Users/oliver/.elan ELAN_TOOLCHAIN=leanprover/lean4:v4.21.0 LAKE=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/bin/lake LAKE_HOME=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0 LAKE_PKG_URL_MAP={} LEAN=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/bin/lean LEAN_GITHASH=6741444a63eec253a7eae7a83f1beb3de015023d LEAN_SYSROOT=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0 LEAN_AR=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/bin/llvm-ar LEAN_CC= LEAN_PATH=/Users/oliver/git/iris-lean/.lake/packages/Qq/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/packages/MD4Lean/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/packages/BibtexQuery/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/packages/UnicodeBasic/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/packages/Cli/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/build/lib/lean:/Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/lib/lean:/Users/oliver/git/iris-lean/docbuild/.lake/build/lib/lean:/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/lib/lean LEAN_SRC_PATH=/Users/oliver/git/iris-lean/.lake/packages/Qq:/Users/oliver/git/iris-lean/.lake/packages/MD4Lean:/Users/oliver/git/iris-lean/.lake/packages/MD4Lean:/Users/oliver/git/iris-lean/.lake/packages/BibtexQuery:/Users/oliver/git/iris-lean/.lake/packages/UnicodeBasic:/Users/oliver/git/iris-lean/.lake/packages/UnicodeBasic:/Users/oliver/git/iris-lean/.lake/packages/Cli:/Users/oliver/git/iris-lean/./src/:/Users/oliver/git/iris-lean/./src/:/Users/oliver/git/iris-lean/.lake/packages/doc-gen4:/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/src/lean/lake PATH DYLD_LIBRARY_PATH=/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/lib/lean:/Users/oliver/.elan/toolchains/leanprover--lean4---v4.21.0/lib:/Users/oliver/git/iris-lean/docbuild/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/Cli/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/UnicodeBasic/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/BibtexQuery/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/MD4Lean/.lake/build/lib:/Users/oliver/git/iris-lean/.lake/packages/Qq/.lake/build/lib /Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4 single --build /Users/oliver/git/iris-lean/docbuild/.lake/build Iris.ProofMode.Tactics.Exact https://github.com/oliversoeser/iris-lean/blob/3f0268312ffe0c22e6d65f5e0c4742d995eef6b9/src//Iris/ProofMode/Tactics/Exact.lean",
+   "level": "trace"}],
+ "inputs":
+ [["<collection>",
+   [["/Users/oliver/git/iris-lean/docbuild/.lake/build/doc/Iris/ProofMode/Tactics/Basic.html",
+     "26363111201031442"],
+    ["/Users/oliver/git/iris-lean/docbuild/.lake/build/doc/Iris/ProofMode/Tactics/Remove.html",
+     "5674088417932887595"]]],
+  ["/Users/oliver/git/iris-lean/docbuild/.lake/build/doc-data/references.json",
+   "11893762902049086281"],
+  ["/Users/oliver/git/iris-lean/.lake/packages/doc-gen4/.lake/build/bin/doc-gen4",
+   "8370956316283772175"],
+  ["Iris.ProofMode.Tactics.Exact:leanArts", "1943772846090886012"]],
+ "depHash": "9521112452209820138"}

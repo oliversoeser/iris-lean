@@ -1,0 +1,1 @@
+{"name":"Iris","instances":[],"imports":["Init","Iris.Algebra","Iris.BI","Iris.Examples","Iris.Instances","Iris.ProofMode","Iris.Std","Iris.Tests"],"declarations":[]}
