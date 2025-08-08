@@ -549,3 +549,38 @@ instance fromPure_absorbingly (a : Bool) [BI PROP] (P : PROP) (φ : Prop)
     [h : FromPure a P φ] : FromPure false iprop(<absorb> P) φ where
   from_pure := absorbingly_affinely_intro_of_persistent.trans <|
     absorbingly_mono <| affinely_affinelyIf.trans h.1
+
+
+-- AutoSolve
+instance autoSolve_rfl [BI PROP] (P : PROP)
+    : AutoSolve P P where
+  solution := .rfl
+
+instance autoSolve_sep_mono [BI PROP] (P Q P' Q' : PROP)
+    [h1 : AutoSolve P Q] [h2 : AutoSolve P' Q']
+    : AutoSolve iprop(P ∗ P') iprop(Q ∗ Q') where
+  solution := sep_mono h1.1 h2.1
+
+instance autoSolve_emp_sep_mp [BI PROP] (P : PROP)
+    : AutoSolve iprop(emp ∗ P) P where
+  solution := emp_sep.mp
+
+instance autoSolve_emp_sep_mpr [BI PROP] (P : PROP)
+    : AutoSolve P iprop(emp ∗ P) where
+  solution := emp_sep.mpr
+
+instance autoSolve_sep_symm [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(P ∗ Q) iprop(Q ∗ P) where
+  solution := sep_symm
+
+instance autoSolve_sep_assoc_l [BI PROP] (P Q R : PROP)
+    : AutoSolve iprop((P ∗ Q) ∗ R) iprop(P ∗ (Q ∗ R)) where
+  solution := sep_assoc_l
+
+instance autoSolve_wand_intro [BI PROP] (P Q R : PROP)
+    [h : AutoSolve iprop(P ∗ Q) R] : AutoSolve P iprop(Q -∗ R) where
+  solution := wand_intro h.1
+
+instance autoSolve_wand_elim [BI PROP] (P Q R : PROP)
+    [h : AutoSolve P iprop(Q -∗ R)] : AutoSolve iprop(P ∗ Q) R where
+  solution := wand_elim h.1

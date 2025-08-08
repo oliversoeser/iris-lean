@@ -118,4 +118,8 @@ class FromPure [BI PROP] (a : outParam Bool) (P : PROP) (φ : outParam Prop) whe
   from_pure : <affine>?a ⌜φ⌝ ⊢ P
 export FromPure (from_pure)
 
+class AutoSolve [BI PROP] (P Q : PROP) where
+  solution : P ⊢ Q
+export AutoSolve (solution)
+
 end Iris.ProofMode
