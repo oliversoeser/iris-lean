@@ -178,6 +178,14 @@ theorem lean_pure [BI PROP] (Q : PROP) : <affine> ⌜⊢ Q⌝ ⊢ Q := by
 
 end assumption
 
+-- auto
+namespace auto
+
+theorem exact [BI PROP] (Q : PROP) : Q ⊢ Q := by
+  iauto
+
+end auto
+
 -- ex falso
 namespace exfalso
 
