@@ -552,9 +552,59 @@ instance fromPure_absorbingly (a : Bool) [BI PROP] (P : PROP) (φ : Prop)
 
 
 -- AutoSolve
+/-
+  Transitivity is troublesome, how can an appropriate Q be found?
+  trans {P Q R : PROP} : (P ⊢ Q) → (Q ⊢ R) → (P ⊢ R)
+
+  Not gonna bother with solving φ, just add it as a goal
+  pure_intro {φ : Prop} {P : PROP} : φ → P ⊢ ⌜φ⌝
+  pure_elim' {φ : Prop} {P : PROP} : (φ → True ⊢ P) → ⌜φ⌝ ⊢ P
+
+  I'll ignore the quantifiers for now
+  sForall_intro {P : PROP} {Ψ : PROP → Prop} : (∀ p, Ψ p → P ⊢ p) → P ⊢ sForall Ψ
+  sForall_elim {Ψ : PROP → Prop} {p : PROP} : Ψ p → sForall Ψ ⊢ p
+
+  sExists_intro {Ψ : PROP → Prop} {p : PROP} : Ψ p → p ⊢ sExists Ψ
+  sExists_elim {Φ : PROP → Prop} {Q : PROP} : (∀ p, Φ p → p ⊢ Q) → sExists Φ ⊢ Q
+-/
+
 instance autoSolve_rfl [BI PROP] (P : PROP)
     : AutoSolve P P where
   solution := .rfl
+
+instance autoSolve_and_intro [BI PROP] (P Q R : PROP)
+    [h1 : AutoSolve P Q] [h2 : AutoSolve P R]
+    : AutoSolve P iprop(Q ∧ R) where
+  solution := and_intro h1.1 h2.1
+
+instance autoSolve_and_elim_l [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(P ∧ Q) P where
+  solution := and_elim_l
+
+instance autoSolve_and_elim_r [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(P ∧ Q) Q where
+  solution := and_elim_r
+
+instance autoSolve_or_intro_l [BI PROP] (P Q : PROP)
+    : AutoSolve P iprop(P ∨ Q) where
+  solution := or_intro_l
+
+instance autoSolve_or_intro_r [BI PROP] (P Q : PROP)
+    : AutoSolve Q iprop(P ∨ Q) where
+  solution := or_intro_r
+
+instance autoSolve_or_elim [BI PROP] (P Q R : PROP)
+    [h1 : AutoSolve P R] [h2 : AutoSolve Q R]
+    : AutoSolve iprop(P ∨ Q) R where
+  solution := or_elim h1.1 h2.1
+
+instance autoSolve_imp_intro [BI PROP] (P Q R : PROP)
+    [h : AutoSolve iprop(P ∧ Q) R] : AutoSolve P iprop(Q → R) where
+  solution := imp_intro h.1
+
+instance autoSolve_imp_elim [BI PROP] (P Q R : PROP)
+    [h : AutoSolve P iprop(Q → R)] : AutoSolve iprop(P ∧ Q) R where
+  solution := imp_elim h.1
 
 instance autoSolve_sep_mono [BI PROP] (P Q P' Q' : PROP)
     [h1 : AutoSolve P Q] [h2 : AutoSolve P' Q']
@@ -584,3 +634,21 @@ instance autoSolve_wand_intro [BI PROP] (P Q R : PROP)
 instance autoSolve_wand_elim [BI PROP] (P Q R : PROP)
     [h : AutoSolve P iprop(Q -∗ R)] : AutoSolve iprop(P ∗ Q) R where
   solution := wand_elim h.1
+
+/-
+  persistently_mono {P Q : PROP} : (P ⊢ Q) → <pers> P ⊢ <pers> Q
+  persistently_idem_2 {P : PROP} : <pers> P ⊢ <pers> <pers> P
+  persistently_emp_2 : (emp : PROP) ⊢ <pers> emp
+  persistently_and_2 {P Q : PROP} : (<pers> P) ∧ (<pers> Q) ⊢ <pers> (P ∧ Q)
+  persistently_sExists_1 {Ψ : PROP → Prop} : <pers> (sExists Ψ) ⊢ ∃ p, ⌜Ψ p⌝ ∧ <pers> p
+  persistently_absorb_l {P Q : PROP} : <pers> P ∗ Q ⊢ <pers> P
+  persistently_and_l {P Q : PROP} : <pers> P ∧ Q ⊢ P ∗ Q
+
+  later_mono {P Q : PROP} : (P ⊢ Q) → ▷ P ⊢ ▷ Q
+  later_intro {P : PROP} : P ⊢ ▷ P
+  later_sForall_2 {Φ : PROP → Prop} : (∀ p, ⌜Φ p⌝ → ▷ p) ⊢ ▷ sForall Φ
+  later_sExists_false {Φ : PROP → Prop} : (▷ sExists Φ) ⊢ ▷ False ∨ ∃ p, ⌜Φ p⌝ ∧ ▷ p
+  later_sep {P Q : PROP} : ▷ (P ∗ Q) ⊣⊢ ▷ P ∗ ▷ Q
+  later_persistently {P : PROP} : ▷ <pers> P ⊣⊢ <pers> ▷ P
+  later_false_em {P : PROP} : ▷ P ⊢ ▷ False ∨ (▷ False → P)
+-/
