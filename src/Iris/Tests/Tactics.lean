@@ -181,7 +181,10 @@ end assumption
 -- auto
 namespace auto
 
-theorem exact [BI PROP] (Q : PROP) : Q ⊢ Q := by
+theorem rfl [BI PROP] (P : PROP) : P ⊢ P := by
+  iauto
+
+theorem and_idemp [BI PROP] (P : PROP) : P ⊢ P ∧ P := by
   iauto
 
 end auto

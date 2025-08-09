@@ -566,6 +566,11 @@ instance fromPure_absorbingly (a : Bool) [BI PROP] (P : PROP) (φ : Prop)
 
   sExists_intro {Ψ : PROP → Prop} {p : PROP} : Ψ p → p ⊢ sExists Ψ
   sExists_elim {Φ : PROP → Prop} {Q : PROP} : (∀ p, Φ p → p ⊢ Q) → sExists Φ ⊢ Q
+
+  persistently_sExists_1 {Ψ : PROP → Prop} : <pers> (sExists Ψ) ⊢ ∃ p, ⌜Ψ p⌝ ∧ <pers> p
+
+  later_sForall_2 {Φ : PROP → Prop} : (∀ p, ⌜Φ p⌝ → ▷ p) ⊢ ▷ sForall Φ
+  later_sExists_false {Φ : PROP → Prop} : (▷ sExists Φ) ⊢ ▷ False ∨ ∃ p, ⌜Φ p⌝ ∧ ▷ p
 -/
 
 instance autoSolve_rfl [BI PROP] (P : PROP)
@@ -635,20 +640,54 @@ instance autoSolve_wand_elim [BI PROP] (P Q R : PROP)
     [h : AutoSolve P iprop(Q -∗ R)] : AutoSolve iprop(P ∗ Q) R where
   solution := wand_elim h.1
 
-/-
-  persistently_mono {P Q : PROP} : (P ⊢ Q) → <pers> P ⊢ <pers> Q
-  persistently_idem_2 {P : PROP} : <pers> P ⊢ <pers> <pers> P
-  persistently_emp_2 : (emp : PROP) ⊢ <pers> emp
-  persistently_and_2 {P Q : PROP} : (<pers> P) ∧ (<pers> Q) ⊢ <pers> (P ∧ Q)
-  persistently_sExists_1 {Ψ : PROP → Prop} : <pers> (sExists Ψ) ⊢ ∃ p, ⌜Ψ p⌝ ∧ <pers> p
-  persistently_absorb_l {P Q : PROP} : <pers> P ∗ Q ⊢ <pers> P
-  persistently_and_l {P Q : PROP} : <pers> P ∧ Q ⊢ P ∗ Q
+instance autoSolve_persistently_mono [BI PROP] (P Q : PROP)
+    [h : AutoSolve P Q] : AutoSolve iprop(<pers> P) iprop(<pers> Q) where
+  solution := persistently_mono h.1
 
-  later_mono {P Q : PROP} : (P ⊢ Q) → ▷ P ⊢ ▷ Q
-  later_intro {P : PROP} : P ⊢ ▷ P
-  later_sForall_2 {Φ : PROP → Prop} : (∀ p, ⌜Φ p⌝ → ▷ p) ⊢ ▷ sForall Φ
-  later_sExists_false {Φ : PROP → Prop} : (▷ sExists Φ) ⊢ ▷ False ∨ ∃ p, ⌜Φ p⌝ ∧ ▷ p
-  later_sep {P Q : PROP} : ▷ (P ∗ Q) ⊣⊢ ▷ P ∗ ▷ Q
-  later_persistently {P : PROP} : ▷ <pers> P ⊣⊢ <pers> ▷ P
-  later_false_em {P : PROP} : ▷ P ⊢ ▷ False ∨ (▷ False → P)
--/
+instance autoSolve_persistently_idem_2 [BI PROP] (P : PROP)
+    : AutoSolve iprop(<pers> P) iprop(<pers> <pers> P) where
+  solution := persistently_idem_2
+
+instance autoSolve_persistently_emp_2 [BI PROP]
+    : AutoSolve (emp : PROP) iprop(<pers> emp) where
+  solution := persistently_emp_2
+
+instance autoSolve_persistently_and_2 [BI PROP] (P Q : PROP)
+    : AutoSolve iprop((<pers> P) ∧ (<pers> Q)) iprop(<pers> (P ∧ Q)) where
+  solution := persistently_and_2
+
+instance autoSolve_absorb_l [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(<pers> P ∗ Q) iprop(<pers> P) where
+  solution := persistently_absorb_l
+
+instance autoSolve_persistently_and_l [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(<pers> P ∧ Q) iprop(P ∗ Q) where
+  solution := persistently_and_l
+
+instance autoSolve_later_mono [BI PROP] (P Q : PROP)
+    [h : AutoSolve P Q] : AutoSolve iprop(▷ P) iprop(▷ Q) where
+  solution := later_mono h.1
+
+instance autoSolve_later_intro [BI PROP] (P : PROP)
+    : AutoSolve P iprop(▷ P) where
+  solution := later_intro
+
+instance autoSolve_later_sep_mp [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(▷ (P ∗ Q)) iprop(▷ P ∗ ▷ Q) where
+  solution := later_sep.mp
+
+instance autoSolve_later_sep_mpr [BI PROP] (P Q : PROP)
+    : AutoSolve iprop(▷ P ∗ ▷ Q) iprop(▷ (P ∗ Q)) where
+  solution := later_sep.mpr
+
+instance autoSolve_later_persistentlys_mp [BI PROP] (P : PROP)
+    : AutoSolve iprop(▷ <pers> P) iprop(<pers> ▷ P) where
+  solution := later_persistently.mp
+
+instance autoSolve_later_persistentlys_mpr [BI PROP] (P : PROP)
+    : AutoSolve iprop(<pers> ▷ P) iprop(▷ <pers> P) where
+  solution := later_persistently.mpr
+
+instance autoSolve_later_false_em [BI PROP] (P : PROP)
+    : AutoSolve iprop(▷ P) iprop(▷ False ∨ (▷ False → P)) where
+  solution := later_false_em
