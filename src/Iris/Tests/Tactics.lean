@@ -187,6 +187,10 @@ theorem rfl [BI PROP] (P : PROP) : P ⊢ P := by
 theorem and_idemp [BI PROP] (P : PROP) : P ⊢ P ∧ P := by
   iauto
 
+theorem sep_comm [BI PROP] (P Q : PROP) : P ∗ Q ⊢ Q ∗ P := by
+  iintro HP
+  iauto
+
 end auto
 
 -- ex falso
