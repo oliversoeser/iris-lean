@@ -36,6 +36,23 @@ instance equiv_entails_trans [BI PROP] : Trans (α := PROP) BiEntails Entails En
 instance entails_equiv_trans [BI PROP] : Trans (α := PROP) Entails BiEntails Entails where
   trans h1 h2 := h1.trans h2.1
 
+instance entails_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
+  rel := Entails
+  rel_refl := .rfl
+  rel_trans := .trans
+  rel_antisymm h1 h2 := BIBase.BiEntails.to_eq <| entails_antisymm.antisymm h1 h2
+  has_csup {c} _ := by
+    apply Exists.intro (sExists (λP => c P))
+    intro x
+    constructor
+    case mp =>
+      intro h y cy
+      refine BIBase.Entails.trans ?_ h
+      exact sExists_intro cy
+    case mpr =>
+      intro h
+      exact sExists_elim h
+
 /-! # Logic -/
 
 @[rocq_alias bi.and_elim_l']
