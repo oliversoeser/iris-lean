@@ -36,3 +36,21 @@ instance entails_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
     case mpr =>
       intro h
       exact sExists_elim h
+
+
+instance entails_reverse_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
+  rel x y := Entails y x
+  rel_refl := .rfl
+  rel_trans h1 h2 := .trans h2 h1
+  rel_antisymm h1 h2 := BIBase.BiEntails.to_eq <| entails_antisymm.antisymm h2 h1
+  has_csup {c} _ := by
+    exists sForall (λP => c P)
+    intro x
+    constructor
+    case mp =>
+      intro h y cy
+      apply BIBase.Entails.trans h
+      exact sForall_elim cy
+    case mpr =>
+      intro h
+      exact sForall_intro h
