@@ -38,75 +38,56 @@ instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : Comp
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_pure
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → Prop)
     (h : @monotone _ _ _ ImplicationOrder.instOrder f) :
-    @monotone _ _ _ (@EntailmentOrder.instOrder PROP _ _) (fun x => iprop(⌜f x⌝)) := by
-  intro x y hxy
-  apply pure_mono
-  exact h x y hxy
+    @monotone _ _ _ (@EntailmentOrder.instOrder PROP _ _) (fun x => iprop(⌜f x⌝)) :=
+  fun x y hxy => pure_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_and
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
     (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
     (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
     (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∧ f₂ x)) := by
-  intro x y hxy
-  apply and_mono
-  · exact h₁ x y hxy
-  · exact h₂ x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∧ f₂ x)) :=
+  fun x y hxy => and_mono (h₁ x y hxy) (h₂ x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_or
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
     (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
     (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
     (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∨ f₂ x)) := by
-  intro x y hxy
-  apply or_mono
-  · exact h₁ x y hxy
-  · exact h₂ x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∨ f₂ x)) :=
+  fun x y hxy => or_mono (h₁ x y hxy) (h₂ x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_forall
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → EntailmentOrder PROP)
     (h : monotone f) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∀ y, f x y)) := by
-  intro x y hxy
-  apply forall_mono
-  exact h x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∀ y, f x y)) :=
+  fun x y hxy => forall_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_exists
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → EntailmentOrder PROP)
     (h : monotone f) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∃ y, f x y)) := by
-  intro x y hxy
-  apply exists_mono
-  exact h x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∃ y, f x y)) :=
+  fun x y hxy => exists_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_sep
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
     (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
     (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
     (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∗ f₂ x)) := by
-  intro x y hxy
-  apply sep_mono
-  · exact h₁ x y hxy
-  · exact h₂ x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∗ f₂ x)) :=
+  fun x y hxy => sep_mono (h₁ x y hxy) (h₂ x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_persistently
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → EntailmentOrder PROP)
     (h : @monotone _ _ _ EntailmentOrder.instOrder f) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(<pers> f x)) := by
-  intro x y hxy
-  apply persistently_mono
-  exact h x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(<pers> f x)) :=
+  fun x y hxy => persistently_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_later
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → EntailmentOrder PROP)
     (h : @monotone _ _ _ EntailmentOrder.instOrder f) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(▷ f x)) := by
-  intro x y hxy
-  apply later_mono
-  exact h x y hxy
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(▷ f x)) :=
+  fun x y hxy => later_mono (h x y hxy)
 
 end entailment_order
 
