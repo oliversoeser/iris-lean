@@ -35,6 +35,14 @@ instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : Comp
       intro h
       exact sExists_elim h
 
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_pure
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → Prop)
+    (h : @monotone _ _ _ ImplicationOrder.instOrder f) :
+    @monotone _ _ _ (@EntailmentOrder.instOrder PROP _ _) (fun x => iprop(⌜f x⌝)) := by
+  intro x y hxy
+  apply pure_mono
+  exact h x y hxy
+
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_and
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
     (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
