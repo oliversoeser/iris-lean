@@ -12,6 +12,8 @@ public import Iris.BI.DerivedLaws
 namespace Iris
 open Iris.Std BI Lean.Order
 
+section entailment_order
+
 abbrev EntailmentOrder (PROP : Type u) [BI PROP] := PROP
 
 instance EntailmentOrder.instOrder [BI PROP] [OFE.Leibniz PROP] : PartialOrder (EntailmentOrder PROP) where
@@ -33,6 +35,32 @@ instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : Comp
       intro h
       exact sExists_elim h
 
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_and
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
+    (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
+    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
+    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∧ f₂ x)) := by
+  intro x y hxy
+  apply and_mono
+  · exact h₁ x y hxy
+  · exact h₂ x y hxy
+
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_or
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
+    (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
+    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
+    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∨ f₂ x)) := by
+  intro x y hxy
+  apply or_mono
+  · exact h₁ x y hxy
+  · exact h₂ x y hxy
+
+end entailment_order
+
+section reverse_entailment_order
+
 abbrev ReverseEntailmentOrder (PROP : Type u) [BI PROP] := PROP
 
 instance ReverseEntailmentOrder.instOrder [BI PROP] [OFE.Leibniz PROP] : PartialOrder PROP where
@@ -53,3 +81,5 @@ instance ReverseEntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP]
     case mpr =>
       intro h
       exact sForall_intro h
+
+end reverse_entailment_order
