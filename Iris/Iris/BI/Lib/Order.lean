@@ -65,6 +65,22 @@ instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : Comp
   · exact h₁ x y hxy
   · exact h₂ x y hxy
 
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_forall
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → EntailmentOrder PROP)
+    (h : monotone f) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∀ y, f x y)) := by
+  intro x y hxy
+  apply forall_mono
+  exact h x y hxy
+
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_exists
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → EntailmentOrder PROP)
+    (h : monotone f) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∃ y, f x y)) := by
+  intro x y hxy
+  apply exists_mono
+  exact h x y hxy
+
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_sep
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
     (f₁ : α → EntailmentOrder PROP) (f₂ : α → EntailmentOrder PROP)
