@@ -5,27 +5,23 @@ Authors: Oliver Soeser
 -/
 module
 
-public import Iris.BI.Classes
-public import Iris.BI.Extensions
-public import Iris.BI.BI
 public import Iris.BI.DerivedLaws
-public import Iris.Std.Nat
-public import Iris.Std.Classes
-public import Iris.Std.Rewrite
-public import Iris.Std.TC
-import Iris.Std.RocqPorting
 
 @[expose] public section
 
-namespace Iris.BI
-open Iris.Std BI
+namespace Iris
+open Iris.Std BI Lean.Order
 
-instance entails_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
-  rel := Entails
+abbrev EntailmentOrder (PROP : Type u) [BI PROP] := PROP
+
+instance EntailmentOrder.instOrder [BI PROP] [OFE.Leibniz PROP] : PartialOrder (EntailmentOrder PROP) where
+  rel x y := Entails x y
   rel_refl := .rfl
   rel_trans := .trans
   rel_antisymm h1 h2 := BIBase.BiEntails.to_eq <| entails_antisymm.antisymm h1 h2
-  has_csup {c} _ := by
+
+instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : CompleteLattice PROP where
+  has_sup {c} := by
     exists sExists (λP => c P)
     intro x
     constructor
@@ -37,13 +33,16 @@ instance entails_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
       intro h
       exact sExists_elim h
 
+abbrev ReverseEntailmentOrder (PROP : Type u) [BI PROP] := PROP
 
-instance entails_reverse_ccpo [BI PROP] [OFE.Leibniz PROP] : Lean.Order.CCPO PROP where
+instance ReverseEntailmentOrder.instOrder [BI PROP] [OFE.Leibniz PROP] : PartialOrder PROP where
   rel x y := Entails y x
   rel_refl := .rfl
   rel_trans h1 h2 := .trans h2 h1
   rel_antisymm h1 h2 := BIBase.BiEntails.to_eq <| entails_antisymm.antisymm h2 h1
-  has_csup {c} _ := by
+
+instance ReverseEntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : CompleteLattice PROP where
+  has_sup {c} := by
     exists sForall (λP => c P)
     intro x
     constructor
