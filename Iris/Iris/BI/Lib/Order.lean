@@ -10,7 +10,7 @@ public import Iris.BI.DerivedLaws
 @[expose] public section
 
 namespace Iris
-open Iris.Std BI Lean.Order
+open BI Lean.Order
 
 section entailment_order
 
@@ -172,7 +172,7 @@ end reverse_entailment_order
 
 section antitone
 
-@[partial_fixpoint_monotone] theorem entailment_order_imp
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_imp
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
     (f₂ : α → PROP)
     (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
@@ -180,7 +180,7 @@ section antitone
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x → f₂ x)) :=
   fun x y hxy => imp_mono (h₁ x y hxy) (h₂ x y hxy)
 
-@[partial_fixpoint_monotone] theorem reverse_entailment_order_imp
+@[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_imp
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
     (f₂ : α → PROP)
     (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
@@ -188,7 +188,7 @@ section antitone
     @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x → f₂ x)) :=
   fun x y hxy => imp_mono (h₁ x y hxy) (h₂ x y hxy)
 
-@[partial_fixpoint_monotone] theorem entailment_order_wand
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_wand
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
     (f₂ : α → PROP)
     (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
@@ -196,7 +196,7 @@ section antitone
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x -∗ f₂ x)) :=
   fun x y hxy => wand_mono (h₁ x y hxy) (h₂ x y hxy)
 
-@[partial_fixpoint_monotone] theorem reverse_entailment_order_wand
+@[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_wand
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
     (f₂ : α → PROP)
     (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
