@@ -35,6 +35,9 @@ instance EntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP] : Comp
       intro h
       exact sExists_elim h
 
+instance EntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PROP where
+  has_csup {c} _ := EntailmentOrder.instCompleteLattice.has_sup c
+
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_pure
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → Prop)
     (h : @monotone _ _ _ ImplicationOrder.instOrder f) :
@@ -113,6 +116,9 @@ instance ReverseEntailmentOrder.instCompleteLattice [BI PROP] [OFE.Leibniz PROP]
     case mpr =>
       intro h
       exact sForall_intro h
+
+instance ReverseEntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PROP where
+  has_csup {c} _ := ReverseEntailmentOrder.instCompleteLattice.has_sup c
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_pure
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → Prop)
