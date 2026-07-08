@@ -5,7 +5,7 @@ Authors: Oliver Soeser
 -/
 module
 
-public import Iris.BI.DerivedLaws
+public import Iris.BI.Updates
 
 @[expose] public section
 
@@ -92,6 +92,18 @@ instance EntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PROP where
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(▷ f x)) :=
   fun x y hxy => later_mono (h x y hxy)
 
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_fupd
+    [BI PROP] [BIFUpdate PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
+    (h : @monotone _ _ _ EntailmentOrder.instOrder f) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(|={E1,E2}=> f x)) :=
+  fun x y hxy => BIFUpdate.mono (h x y hxy)
+
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_fupdN
+    [BI PROP] [BIFUpdate PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
+    (h : @monotone _ _ _ EntailmentOrder.instOrder f) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(|={E1}[E2]▷=>^[n] f x)) :=
+  fun x y hxy => step_fupdN_mono (h x y hxy)
+
 end entailment_order
 
 section reverse_entailment_order
@@ -173,6 +185,18 @@ instance ReverseEntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PRO
     (h : @monotone _ _ _ ReverseEntailmentOrder.instOrder f) :
     @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(▷ f x)) :=
   fun x y hxy => later_mono (h x y hxy)
+
+@[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_fupd
+    [BI PROP] [BIFUpdate PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
+    (h : @monotone _ _ _ ReverseEntailmentOrder.instOrder f) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(|={E1,E2}=> f x)) :=
+  fun x y hxy => BIFUpdate.mono (h x y hxy)
+
+@[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_fupdN
+    [BI PROP] [BIFUpdate PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
+    (h : @monotone _ _ _ ReverseEntailmentOrder.instOrder f) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(|={E1}[E2]▷=>^[n] f x)) :=
+  fun x y hxy => step_fupdN_mono (h x y hxy)
 
 end reverse_entailment_order
 
