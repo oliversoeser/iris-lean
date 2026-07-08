@@ -45,40 +45,36 @@ instance EntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PROP where
   fun x y hxy => pure_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_and
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∧ f₂ x)) :=
-  fun x y hxy => and_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ EntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ EntailmentOrder.instOrder f2) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f1 x ∧ f2 x)) :=
+  fun x y hxy => and_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_or
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∨ f₂ x)) :=
-  fun x y hxy => or_mono (h₁ x y hxy) (h₂ x y hxy)
+    (f1 : α → PROP) (f2 : α → PROP)
+    (h1 : @monotone _ _ _ EntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ EntailmentOrder.instOrder f2) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f1 x ∨ f2 x)) :=
+  fun x y hxy => or_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_forall
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP)
-    (h : monotone f) :
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP) (h : monotone f) :
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∀ y, f x y)) :=
   fun x y hxy => forall_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_exists
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP)
-    (h : monotone f) :
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP) (h : monotone f) :
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(∃ y, f x y)) :=
   fun x y hxy => exists_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_sep
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x ∗ f₂ x)) :=
-  fun x y hxy => sep_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ EntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ EntailmentOrder.instOrder f2) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f1 x ∗ f2 x)) :=
+  fun x y hxy => sep_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_persistently
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
@@ -145,40 +141,35 @@ instance ReverseEntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PRO
   fun x y hxy => pure_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_and
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x ∧ f₂ x)) :=
-  fun x y hxy => and_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f2) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f1 x ∧ f2 x)) :=
+  fun x y hxy => and_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_or
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x ∨ f₂ x)) :=
-  fun x y hxy => or_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f2) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f1 x ∨ f2 x)) :=
+  fun x y hxy => or_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_forall
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP)
-    (h : monotone f) :
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP) (h : monotone f) :
     @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(∀ y, f x y)) :=
   fun x y hxy => forall_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_exists
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP)
-    (h : monotone f) :
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] {β} (f : α → β → PROP) (h : monotone f) :
     @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(∃ y, f x y)) :=
   fun x y hxy => exists_mono (h x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_sep
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]
-    (f₁ : α → PROP) (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₂) :
-    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x ∗ f₂ x)) :=
-  fun x y hxy => sep_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f2) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f1 x ∗ f2 x)) :=
+  fun x y hxy => sep_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_persistently
     [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f : α → PROP)
@@ -215,35 +206,31 @@ end reverse_entailment_order
 section antitone
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_imp
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
-    (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂):
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x → f₂ x)) :=
-  fun x y hxy => imp_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ EntailmentOrder.instOrder f2):
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f1 x → f2 x)) :=
+  fun x y hxy => imp_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_imp
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
-    (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₂):
-    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x → f₂ x)) :=
-  fun x y hxy => imp_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ EntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f2):
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f1 x → f2 x)) :=
+  fun x y hxy => imp_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem entailment_order_monotone_wand
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
-    (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ EntailmentOrder.instOrder f₂):
-    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f₁ x -∗ f₂ x)) :=
-  fun x y hxy => wand_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ EntailmentOrder.instOrder f2):
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(f1 x -∗ f2 x)) :=
+  fun x y hxy => wand_mono (h1 x y hxy) (h2 x y hxy)
 
 @[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_wand
-    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f₁ : α → PROP)
-    (f₂ : α → PROP)
-    (h₁ : @monotone _ _ _ EntailmentOrder.instOrder f₁)
-    (h₂ : @monotone _ _ _ ReverseEntailmentOrder.instOrder f₂):
-    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f₁ x -∗ f₂ x)) :=
-  fun x y hxy => wand_mono (h₁ x y hxy) (h₂ x y hxy)
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α] (f1 f2 : α → PROP)
+    (h1 : @monotone _ _ _ EntailmentOrder.instOrder f1)
+    (h2 : @monotone _ _ _ ReverseEntailmentOrder.instOrder f2):
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(f1 x -∗ f2 x)) :=
+  fun x y hxy => wand_mono (h1 x y hxy) (h2 x y hxy)
 
 end antitone
