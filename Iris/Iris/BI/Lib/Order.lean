@@ -104,6 +104,12 @@ instance EntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PROP where
     @monotone _ _ _ EntailmentOrder.instOrder (fun x => iprop(|={E1}[E2]▷=>^[n] f x)) :=
   fun x y hxy => step_fupdN_mono (h x y hxy)
 
+@[partial_fixpoint_monotone] theorem entailment_order_monotone_bigSepL
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]  (Φ : Nat → β → α → PROP)
+    (h :  ∀ {k x}, @monotone _ _ _ EntailmentOrder.instOrder (Φ k x)) :
+    @monotone _ _ _ EntailmentOrder.instOrder (fun x' : α => iprop([∗list] k ↦ x ∈ l, Φ k x x')) :=
+  fun x y hxy => BigSepL.bigSepL_mono_of_forall (h x y hxy)
+
 end entailment_order
 
 section reverse_entailment_order
@@ -197,6 +203,12 @@ instance ReverseEntailmentOrder.instCCPO [BI PROP] [OFE.Leibniz PROP] : CCPO PRO
     (h : @monotone _ _ _ ReverseEntailmentOrder.instOrder f) :
     @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x => iprop(|={E1}[E2]▷=>^[n] f x)) :=
   fun x y hxy => step_fupdN_mono (h x y hxy)
+
+@[partial_fixpoint_monotone] theorem reverse_entailment_order_monotone_bigSepL
+    [BI PROP] [OFE.Leibniz PROP] {α} [PartialOrder α]  (Φ : Nat → β → α → PROP)
+    (h :  ∀ {k x}, @monotone _ _ _ ReverseEntailmentOrder.instOrder (Φ k x)) :
+    @monotone _ _ _ ReverseEntailmentOrder.instOrder (fun x' : α => iprop([∗list] k ↦ x ∈ l, Φ k x x')) :=
+  fun x y hxy => BigSepL.bigSepL_mono_of_forall (h x y hxy)
 
 end reverse_entailment_order
 
