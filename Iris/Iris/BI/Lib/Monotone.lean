@@ -12,6 +12,13 @@ public import Iris.BI.Lib.Fixpoint
 namespace Iris
 open BI OFE
 
+class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
+  anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
+    ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, F Ψ x -∗ F Φ x
+  anti_pred_ne {Φ : A → PROP} [NonExpansive Φ] : NonExpansive (F Φ)
+
+section monotone
+
 instance monotone_constant [BI PROP] [OFE A] : BIMonoPred
     (λ_ : A → PROP => λ_ : A => P) where
   mono_pred {_ _ _ _} := by
@@ -84,6 +91,24 @@ instance monotone_sep [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
     have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
     exact sep_ne.ne h₁ h₂
 
+instance monotone_wand [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
+      [hf : BIAntiPred F] [hg : BIMonoPred G] :
+    BIMonoPred (λΦ : A → PROP => λx : A => iprop(F Φ x -∗ G Φ x)) where
+  mono_pred {Φ Ψ h₁ h₂} := by
+    iintro #H1 %x H2 HF
+    iapply @hg.mono_pred Φ Ψ h₁ h₂
+    iexact H1
+    iapply H2
+    iapply @hf.anti_pred Φ Ψ h₁ h₂
+    iexact H1
+    iexact HF
+  mono_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    have h₁ := (@hf.anti_pred_ne Φ h).ne hneq
+    have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
+    exact wand_ne.ne h₁ h₂
+
 instance monotone_persistently [BI PROP] [OFE A] (F : (A → PROP) → A → PROP)
     [hf : BIMonoPred F] : BIMonoPred (λΦ : A → PROP => λx : A => iprop(<pers> F Φ x)) where
   mono_pred {Φ Ψ h₁ h₂} := by
@@ -111,3 +136,5 @@ instance monotone_later [BI PROP] [OFE A] (F : (A → PROP) → A → PROP)
     intro n x₁ x₂ hneq
     have h' := (@hf.mono_pred_ne Φ h).ne hneq
     exact later_ne.ne h'
+
+end monotone
