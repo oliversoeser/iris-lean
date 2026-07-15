@@ -18,6 +18,8 @@ class BIMonoProp [BI PROP] (F : PROP → PROP) where
 class BIAntiProp [BI PROP] (F : PROP → PROP) where
   anti_prop {P Q : PROP} : ⊢ □ (P -∗ Q) -∗ F Q -∗ F P
 
+section monotone
+
 instance monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
   mono_prop {P Q} := by
     iintro - HR
@@ -121,6 +123,10 @@ instance monotone_later [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     · iexact H1
     · iexact HP
 
+end monotone
+
+section antitone
+
 instance antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
   anti_prop {P Q} := by
     iintro - HR
@@ -218,3 +224,20 @@ instance antitone_later [BI PROP] (F : PROP → PROP) [hf : BIAntiProp F]
     iapply @hf.anti_prop P Q
     · iexact H1
     · iexact HP
+
+end antitone
+
+section tactic
+
+elab "monoprop" : tactic =>
+  Lean.Elab.Tactic.withMainContext do
+    let goal ← Lean.Elab.Tactic.getMainGoal
+    let goalDecl ← goal.getDecl
+    let goalType := goalDecl.type
+    dbg_trace f!"goal type: {goalType}"
+
+instance [BI PROP] : BIMonoProp (λP : PROP => P) := by
+  monoprop
+  sorry
+
+end tactic
