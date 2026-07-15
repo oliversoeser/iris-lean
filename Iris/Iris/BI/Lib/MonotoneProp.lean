@@ -48,6 +48,23 @@ instance monotone_or [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
       iexact H1
       iexact HG
 
+instance monotone_forall [BI PROP] (F : A → PROP → PROP)
+    [hf : ∀x, BIMonoProp (F x)] : BIMonoProp (λP : PROP => iprop(∀x, F x P)) where
+  mono_prop {P Q} := by
+    iintro #H1 H2 %a
+    iapply @(hf a).mono_prop P
+    · iexact H1
+    · iexact H2
+
+instance monotone_exists [BI PROP] (F : A → PROP → PROP)
+    [hf : ∀x, BIMonoProp (F x)] : BIMonoProp (λP : PROP => iprop(∃x, F x P)) where
+  mono_prop {P Q} := by
+    iintro #H1 ⟨%x, H2⟩
+    iexists x
+    iapply @(hf x).mono_prop P
+    · iexact H1
+    · iexact H2
+
 instance monotone_sep [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     [hg : BIMonoProp G] : BIMonoProp (λP : PROP => iprop(F P ∗ G P)) where
   mono_prop {P Q} := by
