@@ -120,3 +120,101 @@ instance monotone_later [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     iapply @hf.mono_prop P Q
     · iexact H1
     · iexact HP
+
+instance antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
+  anti_prop {P Q} := by
+    iintro - HR
+    iexact HR
+
+instance antitone_pure [BI PROP] (F : PROP → Prop)
+    [hf : BIAntiProp (λP => iprop(⌜F P⌝ : PROP))] : BIAntiProp (λP : PROP => iprop(⌜F P⌝)) where
+  anti_prop {P Q} := by
+    iintro #H1 HP
+    iapply @hf.anti_prop P Q
+    · iexact H1
+    · iexact HP
+
+instance antitone_and [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIAntiProp G] : BIAntiProp (λP : PROP => iprop(F P ∧ G P)) where
+  anti_prop {P Q} := by
+    iintro #H1 H2
+    isplit
+    · iapply @hf.anti_prop P Q
+      · iexact H1
+      · iexact H2
+    · iapply @hg.anti_prop P Q
+      · iexact H1
+      · iexact H2
+
+instance antitone_or [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIAntiProp G] : BIAntiProp (λP : PROP => iprop(F P ∨ G P)) where
+  anti_prop {P Q} := by
+    iintro #H1 (HF | HG)
+    · ileft
+      iapply @hf.anti_prop P Q
+      iexact H1
+      iexact HF
+    · iright
+      iapply @hg.anti_prop P Q
+      iexact H1
+      iexact HG
+
+-- TODO: antitone_imp
+
+instance antitone_forall [BI PROP] (F : A → PROP → PROP)
+    [hf : ∀x, BIAntiProp (F x)] : BIAntiProp (λP : PROP => iprop(∀x, F x P)) where
+  anti_prop {P Q} := by
+    iintro #H1 H2 %a
+    iapply @(hf a).anti_prop P
+    · iexact H1
+    · iexact H2
+
+instance antitone_exists [BI PROP] (F : A → PROP → PROP)
+    [hf : ∀x, BIAntiProp (F x)] : BIAntiProp (λP : PROP => iprop(∃x, F x P)) where
+  anti_prop {P Q} := by
+    iintro #H1 ⟨%x, H2⟩
+    iexists x
+    iapply @(hf x).anti_prop P
+    · iexact H1
+    · iexact H2
+
+instance antitone_sep [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIAntiProp G] : BIAntiProp (λP : PROP => iprop(F P ∗ G P)) where
+  anti_prop {P Q} := by
+    iintro #H1 ⟨HF, HG⟩
+    isplitl [HF]
+    · iapply @hf.anti_prop P Q
+      · iexact H1
+      · iexact HF
+    · iapply @hg.anti_prop P Q
+      · iexact H1
+      · iexact HG
+
+instance antitone_wand [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
+    [hg : BIAntiProp G] : BIAntiProp (λP : PROP => iprop(F P -∗ G P)) where
+  anti_prop {P Q} := by
+    iintro #H1 H2 HF
+    iapply @hg.anti_prop P
+    · iexact H1
+    · iapply H2
+      iapply @hf.mono_prop P Q
+      · iexact H1
+      · iexact HF
+
+instance antitone_persistently [BI PROP] (F : PROP → PROP) [hf : BIAntiProp F]
+    : BIAntiProp (λP : PROP => iprop(<pers> F P)) where
+  anti_prop {P Q} := by
+    iintro #H1 #HF
+    imodintro
+    iapply @hf.anti_prop P Q
+    · iexact H1
+    · iexact HF
+
+instance antitone_later [BI PROP] (F : PROP → PROP) [hf : BIAntiProp F]
+    : BIAntiProp (λP : PROP => iprop(▷ F P)) where
+  anti_prop {P Q} := by
+    iintro #H1 HP
+    inext
+    iapply @hf.anti_prop P Q
+    · iexact H1
+    · iexact HP
