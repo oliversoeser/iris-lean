@@ -18,6 +18,16 @@ class BIMonoProp [BI PROP] (F : PROP → PROP) where
 class BIAntiProp [BI PROP] (F : PROP → PROP) where
   anti_prop {P Q : PROP} : ⊢ □ (P -∗ Q) -∗ F Q -∗ F P
 
+instance monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
+  mono_prop {P Q} := by
+    iintro - HR
+    iexact HR
+
+instance monotone_id [BI PROP] : BIMonoProp (λR : PROP => R) where
+  mono_prop {P Q} := by
+    iintro #H
+    iexact H
+
 instance monotone_pure [BI PROP] (F : PROP → Prop)
     [hf : BIMonoProp (λP => iprop(⌜F P⌝ : PROP))] : BIMonoProp (λP : PROP => iprop(⌜F P⌝)) where
   mono_prop {P Q} := by
@@ -50,6 +60,8 @@ instance monotone_or [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
       iapply @hg.mono_prop P Q
       iexact H1
       iexact HG
+
+-- TODO: monotone_imp
 
 instance monotone_forall [BI PROP] (F : A → PROP → PROP)
     [hf : ∀x, BIMonoProp (F x)] : BIMonoProp (λP : PROP => iprop(∀x, F x P)) where
