@@ -15,6 +15,9 @@ open BI OFE
 class BIMonoProp [BI PROP] (F : PROP → PROP) where
   mono_prop {P Q : PROP} : ⊢ □ (P -∗ Q) -∗ F P -∗ F Q
 
+class BIAntiProp [BI PROP] (F : PROP → PROP) where
+  anti_prop {P Q : PROP} : ⊢ □ (P -∗ Q) -∗ F Q -∗ F P
+
 instance monotone_pure [BI PROP] (F : PROP → Prop)
     [hf : BIMonoProp (λP => iprop(⌜F P⌝ : PROP))] : BIMonoProp (λP : PROP => iprop(⌜F P⌝)) where
   mono_prop {P Q} := by
@@ -76,6 +79,17 @@ instance monotone_sep [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     · iapply @hg.mono_prop P Q
       · iexact H1
       · iexact HG
+
+instance monotone_wand [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIMonoProp G] : BIMonoProp (λP : PROP => iprop(F P -∗ G P)) where
+  mono_prop {P Q} := by
+    iintro #H1 H2 HF
+    iapply @hg.mono_prop P
+    · iexact H1
+    · iapply H2
+      iapply @hf.anti_prop P Q
+      · iexact H1
+      · iexact HF
 
 instance monotone_persistently [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     : BIMonoProp (λP : PROP => iprop(<pers> F P)) where
