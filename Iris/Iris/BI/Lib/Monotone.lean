@@ -72,6 +72,26 @@ instance monotone_or [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
     have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
     exact or_ne.ne h₁ h₂
 
+instance monotone_imp [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
+      [hf : BIAntiPred F] [hg : BIMonoPred G] :
+    BIMonoPred (λΦ : A → PROP => λx : A => iprop(<pers> F Φ x → G Φ x)) where
+  mono_pred {Φ Ψ h₁ h₂} := by
+    iintro #H1 %x H2 #HF
+    iapply @hg.mono_pred Φ Ψ h₁ h₂
+    · iexact H1
+    · iapply (@intuitionistically_wand _ _ (F Φ x)).mpr $$ [H2]
+      iexact H2
+      imodintro
+      iapply @hf.anti_pred Φ Ψ h₁ h₂
+      · iexact H1
+      · iexact HF
+  mono_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    have h₁ := persistently_ne.ne ((@hf.anti_pred_ne Φ h).ne hneq)
+    have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
+    exact imp_ne.ne h₁ h₂
+
 instance monotone_sep [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIMonoPred F] [hg : BIMonoPred G] :
     BIMonoPred (λΦ : A → PROP => λx : A => iprop(F Φ x ∗ G Φ x)) where
@@ -97,11 +117,11 @@ instance monotone_wand [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
   mono_pred {Φ Ψ h₁ h₂} := by
     iintro #H1 %x H2 HF
     iapply @hg.mono_pred Φ Ψ h₁ h₂
-    iexact H1
-    iapply H2
-    iapply @hf.anti_pred Φ Ψ h₁ h₂
-    iexact H1
-    iexact HF
+    · iexact H1
+    · iapply H2
+      iapply @hf.anti_pred Φ Ψ h₁ h₂
+      · iexact H1
+      · iexact HF
   mono_pred_ne {Φ h} := by
     constructor
     intro n x₁ x₂ hneq
@@ -187,6 +207,26 @@ instance antitone_or [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
     have h₂ := (@hg.anti_pred_ne Φ h).ne hneq
     exact or_ne.ne h₁ h₂
 
+instance antitone_imp [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
+      [hf : BIMonoPred F] [hg : BIAntiPred G] :
+    BIAntiPred (λΦ : A → PROP => λx : A => iprop(<pers> F Φ x → G Φ x)) where
+  anti_pred {Φ Ψ h₁ h₂} := by
+    iintro #H1 %x H2 #HF
+    iapply @hg.anti_pred Φ Ψ h₁ h₂
+    · iexact H1
+    · iapply (@intuitionistically_wand _ _ (F Ψ x)).mpr $$ [H2]
+      iexact H2
+      imodintro
+      iapply @hf.mono_pred Φ Ψ h₁ h₂
+      · iexact H1
+      · iexact HF
+  anti_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    have h₁ := persistently_ne.ne ((@hf.mono_pred_ne Φ h).ne hneq)
+    have h₂ := (@hg.anti_pred_ne Φ h).ne hneq
+    exact imp_ne.ne h₁ h₂
+
 instance antitone_sep [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIAntiPred F] [hg : BIAntiPred G] :
     BIAntiPred (λΦ : A → PROP => λx : A => iprop(F Φ x ∗ G Φ x)) where
@@ -212,11 +252,11 @@ instance antitone_wand [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
   anti_pred {Φ Ψ h₁ h₂} := by
     iintro #H1 %x H2 HF
     iapply @hg.anti_pred Φ Ψ h₁ h₂
-    iexact H1
-    iapply H2
-    iapply @hf.mono_pred Φ Ψ h₁ h₂
-    iexact H1
-    iexact HF
+    · iexact H1
+    · iapply H2
+      iapply @hf.mono_pred Φ Ψ h₁ h₂
+      · iexact H1
+      · iexact HF
   anti_pred_ne {Φ h} := by
     constructor
     intro n x₁ x₂ hneq
