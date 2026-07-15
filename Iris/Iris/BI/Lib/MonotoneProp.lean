@@ -51,3 +51,21 @@ instance monotone_sep [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     · iapply @hg.mono_prop P Q
       · iexact H1
       · iexact HG
+
+instance monotone_persistently [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
+    : BIMonoProp (λP : PROP => iprop(<pers> F P)) where
+  mono_prop {P Q} := by
+    iintro #H1 #HF
+    imodintro
+    iapply @hf.mono_prop P Q
+    · iexact H1
+    · iexact HF
+
+instance monotone_later [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
+    : BIMonoProp (λP : PROP => iprop(▷ F P)) where
+  mono_prop {P Q} := by
+    iintro #H1 HP
+    inext
+    iapply @hf.mono_prop P Q
+    · iexact H1
+    · iexact HP
