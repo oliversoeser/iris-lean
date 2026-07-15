@@ -39,3 +39,15 @@ instance monotone_or [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
       iapply @hg.mono_prop P Q
       iexact H1
       iexact HG
+
+instance monotone_sep [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
+    [hg : BIMonoProp G] : BIMonoProp (λP : PROP => iprop(F P ∗ G P)) where
+  mono_prop {P Q} := by
+    iintro #H1 ⟨HF, HG⟩
+    isplitl [HF]
+    · iapply @hf.mono_prop P Q
+      · iexact H1
+      · iexact HF
+    · iapply @hg.mono_prop P Q
+      · iexact H1
+      · iexact HG
