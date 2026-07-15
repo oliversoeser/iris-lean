@@ -12,6 +12,16 @@ public import Iris.BI.Lib.Fixpoint
 namespace Iris
 open BI OFE
 
+class PureMonoPred [BI PROP] [OFE A] (F : (A → PROP) → (A → Prop)) where
+  mono_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
+    ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, ⌜F Φ x⌝ -∗ ⌜F Ψ x⌝
+  mono_pred_ne {Φ : A → PROP} [NonExpansive Φ] : NonExpansive (λ x => iprop(⌜F Φ x⌝ : PROP))
+
+class PureAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → Prop)) where
+  anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
+    ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, ⌜F Ψ x⌝ -∗ ⌜F Φ x⌝
+  anti_pred_ne {Φ : A → PROP} [NonExpansive Φ] : NonExpansive (λ x => iprop(⌜F Φ x⌝ : PROP))
+
 class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
   anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
     ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, F Ψ x -∗ F Φ x
@@ -19,19 +29,17 @@ class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
 
 section monotone
 
-instance monotone_constant [BI PROP] [OFE A] : BIMonoPred
-    (λ_ : A → PROP => λ_ : A => P) where
-  mono_pred {_ _ _ _} := by
-    iintro _ %_ HP
-    iexact HP
-  mono_pred_ne := by infer_instance
-
-instance monotone_id [BI PROP] [OFE A] : BIMonoPred
-    (λΦ : A → PROP => Φ) where
-  mono_pred {_ _ _ _} := by
-    iintro #H
-    iexact H
-  mono_pred_ne := by infer_instance
+instance monotone_pure [BI PROP] [OFE A] (F : (A → PROP) → A → Prop)
+    [hf : PureMonoPred F] : BIMonoPred (λΦ : A → PROP => λx : A => iprop(⌜F Φ x⌝)) where
+  mono_pred {Φ Ψ h₁ h₂} := by
+    iintro #H1 %x #H2
+    iapply @hf.mono_pred Φ Ψ h₁ h₂
+    iexact H1
+    iexact H2
+  mono_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    exact (@hf.mono_pred_ne Φ h).ne hneq
 
 instance monotone_and [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIMonoPred F] [hg : BIMonoPred G] :
@@ -161,12 +169,17 @@ end monotone
 
 section antitone
 
-instance antitone_constant [BI PROP] [OFE A] : BIAntiPred
-    (λ_ : A → PROP => λ_ : A => P) where
-  anti_pred {_ _ _ _} := by
-    iintro _ %_ HP
-    iexact HP
-  anti_pred_ne := by infer_instance
+instance antitone_pure [BI PROP] [OFE A] (F : (A → PROP) → A → Prop)
+    [hf : PureAntiPred F] : BIAntiPred (λΦ : A → PROP => λx : A => iprop(⌜F Φ x⌝)) where
+  anti_pred {Φ Ψ h₁ h₂} := by
+    iintro #H1 %x #H2
+    iapply @hf.anti_pred Φ Ψ h₁ h₂
+    iexact H1
+    iexact H2
+  anti_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    exact (@hf.anti_pred_ne Φ h).ne hneq
 
 instance antitone_and [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIAntiPred F] [hg : BIAntiPred G] :
