@@ -45,7 +45,7 @@ instance monotone_comp [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     iapply @hg.mono_prop
     iexact H
 
--- TODO: monotone_prop
+-- TODO: monotone_pure
 
 @[fun_prop]
 instance monotone_and [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
@@ -170,7 +170,7 @@ instance antitone_comp₂ [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     iapply @hg.anti_prop
     iexact H
 
--- TODO: antitone_prop
+-- TODO: antitone_pure
 
 @[fun_prop]
 instance antitone_and [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
