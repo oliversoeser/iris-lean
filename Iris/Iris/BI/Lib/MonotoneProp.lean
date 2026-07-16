@@ -45,6 +45,16 @@ instance monotone_comp [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     iapply @hg.mono_prop
     iexact H
 
+@[fun_prop]
+instance monotone_comp' [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIAntiProp G] : BIMonoProp (λP : PROP => F (G P)) where
+  mono_prop {P Q} := by
+    iintro #H
+    iapply @hf.anti_prop (G Q)
+    imodintro
+    iapply @hg.anti_prop
+    iexact H
+
 -- TODO: monotone_pure
 
 @[fun_prop]
@@ -151,7 +161,7 @@ instance antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
     iexact HR
 
 @[fun_prop]
-instance antitone_comp₁ [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+instance antitone_comp [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
     [hg : BIMonoProp G] : BIAntiProp (λP : PROP => F (G P)) where
   anti_prop {P Q} := by
     iintro #H
@@ -161,7 +171,7 @@ instance antitone_comp₁ [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
     iexact H
 
 @[fun_prop]
-instance antitone_comp₂ [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
+instance antitone_comp' [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     [hg : BIAntiProp G] : BIAntiProp (λP : PROP => F (G P)) where
   anti_prop {P Q} := by
     iintro #H
