@@ -30,9 +30,19 @@ instance monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
     iexact HR
 
 @[fun_prop]
-instance monotone_id (PROP) (h : BI PROP) : BIMonoProp (λR : PROP => R) where
+instance monotone_id [BI PROP] : BIMonoProp (λR : PROP => R) where
   mono_prop {P Q} := by
     iintro #H
+    iexact H
+
+@[fun_prop]
+instance monotone_comp [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
+    [hg : BIMonoProp G] : BIMonoProp (λP : PROP => F (G P)) where
+  mono_prop {P Q} := by
+    iintro #H
+    iapply @hf.mono_prop (G P)
+    imodintro
+    iapply @hg.mono_prop
     iexact H
 
 -- TODO: monotone_prop
@@ -111,7 +121,7 @@ instance monotone_wand [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
       · iexact HF
 
 @[fun_prop]
-theorem monotone_persistently [BI PROP] (F : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_persistently [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     : BIMonoProp (λP : PROP => iprop(<pers> F P)) where
   mono_prop {P Q} := by
     iintro #H1 #HF
@@ -121,7 +131,7 @@ theorem monotone_persistently [BI PROP] (F : PROP → PROP) (hf : BIMonoProp F)
     · iexact HF
 
 @[fun_prop]
-theorem monotone_later [BI PROP] (F : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_later [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     : BIMonoProp (λP : PROP => iprop(▷ F P)) where
   mono_prop {P Q} := by
     iintro #H1 HP
@@ -139,6 +149,26 @@ instance antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
   anti_prop {P Q} := by
     iintro - HR
     iexact HR
+
+@[fun_prop]
+instance antitone_comp₁ [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
+    [hg : BIMonoProp G] : BIAntiProp (λP : PROP => F (G P)) where
+  anti_prop {P Q} := by
+    iintro #H
+    iapply @hf.anti_prop (G P)
+    imodintro
+    iapply @hg.mono_prop
+    iexact H
+
+@[fun_prop]
+instance antitone_comp₂ [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
+    [hg : BIAntiProp G] : BIAntiProp (λP : PROP => F (G P)) where
+  anti_prop {P Q} := by
+    iintro #H
+    iapply @hf.mono_prop (G Q)
+    imodintro
+    iapply @hg.anti_prop
+    iexact H
 
 -- TODO: antitone_prop
 
@@ -236,5 +266,3 @@ instance antitone_later [BI PROP] (F : PROP → PROP) [hf : BIAntiProp F]
     · iexact HP
 
 end antitone
-
-instance [BI PROP] : BIMonoProp (λP : PROP => iprop(True -∗ P)) := by fun_prop
