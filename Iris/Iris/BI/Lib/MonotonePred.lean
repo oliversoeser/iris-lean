@@ -6,22 +6,16 @@ Authors: Oliver Soeser
 module
 
 public import Iris.BI.Lib.Fixpoint
+public import Mathlib.Tactic.FunProp
 
 @[expose] public section
 
 namespace Iris
 open BI OFE
 
-class PureMonoPred [BI PROP] [OFE A] (F : (A → PROP) → (A → Prop)) where
-  mono_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
-    ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, ⌜F Φ x⌝ -∗ ⌜F Ψ x⌝
-  mono_pred_ne {Φ : A → PROP} [NonExpansive Φ] : NonExpansive (λ x => iprop(⌜F Φ x⌝ : PROP))
+attribute [fun_prop] BIMonoPred
 
-class PureAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → Prop)) where
-  anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
-    ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, ⌜F Ψ x⌝ -∗ ⌜F Φ x⌝
-  anti_pred_ne {Φ : A → PROP} [NonExpansive Φ] : NonExpansive (λ x => iprop(⌜F Φ x⌝ : PROP))
-
+@[fun_prop]
 class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
   anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
     ⊢ □ (∀ x, Φ x -∗ Ψ x) -∗ ∀ x, F Ψ x -∗ F Φ x
@@ -29,17 +23,41 @@ class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
 
 section monotone
 
-instance monotone_pure [BI PROP] [OFE A] (F : (A → PROP) → A → Prop)
-    [hf : PureMonoPred F] : BIMonoPred (λΦ : A → PROP => λx : A => iprop(⌜F Φ x⌝)) where
+@[fun_prop]
+instance monotone_const [BI PROP] [OFE A]
+    [hne : NonExpansive Ξ] : BIMonoPred (λ_ : A → PROP => Ξ) where
   mono_pred {Φ Ψ h₁ h₂} := by
-    iintro #H1 %x #H2
-    iapply @hf.mono_pred Φ Ψ h₁ h₂
-    iexact H1
+    iintro #H1 %x H2
     iexact H2
   mono_pred_ne {Φ h} := by
     constructor
     intro n x₁ x₂ hneq
-    exact (@hf.mono_pred_ne Φ h).ne hneq
+    exact hne.ne hneq
+
+instance monotone_id [BI PROP] [OFE A] : BIMonoPred (λΦ : A → PROP => Φ) where
+  mono_pred {Φ Ψ h₁ h₂} := by
+    iintro #H %x HΦ
+    iapply H
+    iexact HΦ
+  mono_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    exact h.ne hneq
+
+instance monotone_comp [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
+    [hf : BIMonoPred F] [hg : BIMonoPred G] : BIMonoPred (λΦ => F (G Φ)) where
+  mono_pred {Φ Ψ h₁ h₂} := by
+    iintro #H %x HΦ
+    iapply @hf.mono_pred (G Φ)
+    · imodintro
+      iapply @hg.mono_pred
+      iexact H
+    · iexact HΦ
+  mono_pred_ne {Φ h} := by
+    constructor
+    intro n x₁ x₂ hneq
+    apply @hf.mono_pred_ne.ne
+    exact hneq
 
 instance monotone_and [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIMonoPred F] [hg : BIMonoPred G] :
@@ -79,26 +97,6 @@ instance monotone_or [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
     have h₁ := (@hf.mono_pred_ne Φ h).ne hneq
     have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
     exact or_ne.ne h₁ h₂
-
-instance monotone_imp [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
-      [hf : BIAntiPred F] [hg : BIMonoPred G] :
-    BIMonoPred (λΦ : A → PROP => λx : A => iprop(<pers> F Φ x → G Φ x)) where
-  mono_pred {Φ Ψ h₁ h₂} := by
-    iintro #H1 %x H2 #HF
-    iapply @hg.mono_pred Φ Ψ h₁ h₂
-    · iexact H1
-    · iapply (@intuitionistically_wand _ _ (F Φ x)).mpr $$ [H2]
-      iexact H2
-      imodintro
-      iapply @hf.anti_pred Φ Ψ h₁ h₂
-      · iexact H1
-      · iexact HF
-  mono_pred_ne {Φ h} := by
-    constructor
-    intro n x₁ x₂ hneq
-    have h₁ := persistently_ne.ne ((@hf.anti_pred_ne Φ h).ne hneq)
-    have h₂ := (@hg.mono_pred_ne Φ h).ne hneq
-    exact imp_ne.ne h₁ h₂
 
 instance monotone_sep [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIMonoPred F] [hg : BIMonoPred G] :
@@ -168,18 +166,6 @@ instance monotone_later [BI PROP] [OFE A] (F : (A → PROP) → A → PROP)
 end monotone
 
 section antitone
-
-instance antitone_pure [BI PROP] [OFE A] (F : (A → PROP) → A → Prop)
-    [hf : PureAntiPred F] : BIAntiPred (λΦ : A → PROP => λx : A => iprop(⌜F Φ x⌝)) where
-  anti_pred {Φ Ψ h₁ h₂} := by
-    iintro #H1 %x #H2
-    iapply @hf.anti_pred Φ Ψ h₁ h₂
-    iexact H1
-    iexact H2
-  anti_pred_ne {Φ h} := by
-    constructor
-    intro n x₁ x₂ hneq
-    exact (@hf.anti_pred_ne Φ h).ne hneq
 
 instance antitone_and [BI PROP] [OFE A] (F G : (A → PROP) → A → PROP)
       [hf : BIAntiPred F] [hg : BIAntiPred G] :
