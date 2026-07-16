@@ -25,18 +25,10 @@ instance monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
     iintro - HR
     iexact HR
 
-instance monotone_id [BI PROP] : BIMonoProp (λR : PROP => R) where
+instance monotone_id (PROP) (h : BI PROP) : BIMonoProp (λR : PROP => R) where
   mono_prop {P Q} := by
     iintro #H
     iexact H
-
-instance monotone_pure [BI PROP] (F : PROP → Prop)
-    [hf : BIMonoProp (λP => iprop(⌜F P⌝ : PROP))] : BIMonoProp (λP : PROP => iprop(⌜F P⌝)) where
-  mono_prop {P Q} := by
-    iintro #H1 HP
-    iapply @hf.mono_prop P Q
-    · iexact H1
-    · iexact HP
 
 instance monotone_and [BI PROP] (F G : PROP → PROP) [hf : BIMonoProp F]
     [hg : BIMonoProp G] : BIMonoProp (λP : PROP => iprop(F P ∧ G P)) where
@@ -105,7 +97,7 @@ instance monotone_wand [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
       · iexact H1
       · iexact HF
 
-instance monotone_persistently [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
+theorem monotone_persistently [BI PROP] (F : PROP → PROP) (hf : BIMonoProp F)
     : BIMonoProp (λP : PROP => iprop(<pers> F P)) where
   mono_prop {P Q} := by
     iintro #H1 #HF
@@ -114,7 +106,7 @@ instance monotone_persistently [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
     · iexact H1
     · iexact HF
 
-instance monotone_later [BI PROP] (F : PROP → PROP) [hf : BIMonoProp F]
+theorem monotone_later [BI PROP] (F : PROP → PROP) (hf : BIMonoProp F)
     : BIMonoProp (λP : PROP => iprop(▷ F P)) where
   mono_prop {P Q} := by
     iintro #H1 HP
@@ -131,14 +123,6 @@ instance antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
   anti_prop {P Q} := by
     iintro - HR
     iexact HR
-
-instance antitone_pure [BI PROP] (F : PROP → Prop)
-    [hf : BIAntiProp (λP => iprop(⌜F P⌝ : PROP))] : BIAntiProp (λP : PROP => iprop(⌜F P⌝)) where
-  anti_prop {P Q} := by
-    iintro #H1 HP
-    iapply @hf.anti_prop P Q
-    · iexact H1
-    · iexact HP
 
 instance antitone_and [BI PROP] (F G : PROP → PROP) [hf : BIAntiProp F]
     [hg : BIAntiProp G] : BIAntiProp (λP : PROP => iprop(F P ∧ G P)) where
@@ -229,15 +213,59 @@ end antitone
 
 section tactic
 
-elab "monoprop" : tactic =>
+open Lean Meta Expr Elab Tactic
+
+elab "monopropstep" : tactic =>
   Lean.Elab.Tactic.withMainContext do
     let goal ← Lean.Elab.Tactic.getMainGoal
     let goalDecl ← goal.getDecl
     let goalType := goalDecl.type
-    dbg_trace f!"goal type: {goalType}"
 
-instance [BI PROP] : BIMonoProp (λP : PROP => P) := by
+    goalType.withApp fun gFn gArgs => do
+      if gFn.isConstOf ``BIMonoProp then
+        let PROP := gArgs[0]!
+        let BI := gArgs[1]!
+        let f := gArgs[2]!
+        let body := f.getLambdaBody
+
+        if body.isApp then body.withApp fun fn args => do
+          if fn.isConstOf ``BI.and then
+            throwError "and"
+          else if fn.isConstOf ``BI.or then
+            throwError "or"
+          else if fn.isConstOf ``BI.forall then
+            throwError "forall"
+          else if fn.isConstOf ``BI.exists then
+            throwError "exists"
+          else if fn.isConstOf ``BI.sep then
+            throwError "sep"
+          else if fn.isConstOf ``BI.wand then
+            throwError "wand"
+          else if fn.isConstOf ``BI.persistently then
+            let p := args[2]!
+            let newF := .lam .anonymous PROP p .default
+            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let proof ← mkAppM ``monotone_persistently #[newF, mvar]
+            goal.assign proof
+            replaceMainGoal [mvar.mvarId!]
+          else if fn.isConstOf ``BI.later then
+            let p := args[2]!
+            let newF := .lam .anonymous PROP p .default
+            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let proof ← mkAppM ``monotone_later #[newF, mvar]
+            goal.assign proof
+            replaceMainGoal [mvar.mvarId!]
+        else if let .bvar dbi := body then
+          if dbi = 0 then
+            let proof ← mkAppM ``monotone_id #[PROP, BI]
+            goal.assign proof
+          else
+            throwError "constant?"
+
+macro "monoprop" : tactic =>
+  `(tactic| repeat monopropstep)
+
+instance [BI PROP] : BIMonoProp (λP : PROP => iprop(▷ <pers> P)) := by
   monoprop
-  sorry
 
 end tactic
