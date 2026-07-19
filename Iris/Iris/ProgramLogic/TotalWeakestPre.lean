@@ -1,10 +1,11 @@
 /-
-Copyright (c) 2026 Fernando Leal. All rights reserved.
+Copyright (c) 2026 Fernando Leal, Oliver Soeser. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
 module
 
 public import Iris.ProgramLogic.WeakestPre
+public import Iris.BI.Lib.MonotonePred
 
 namespace Iris
 
@@ -33,3 +34,13 @@ def twp.pre (s : Stuckness) (wp : CoPset -> Expr -> (Val -> IProp GF) -> IProp G
     ∀ obs e₂ σ₂ eₜ, ⌜(e₁, σ₁) -<obs>-> (e₂, σ₂, eₜ)⌝ ={E,∅}=∗
       ⌜obs = []⌝ ∗ stateInterp σ₂ (ns + 1) obs' (nt + eₜ.length) ∗
       wp E e₂ Φ ∗ [∗list] e' ∈ eₜ, wp ⊤ e' ι.forkPost)
+
+open Function in
+def twp.pre' (s : Stuckness) (wp : (CoPset × Expr) × (Val -> IProp GF) -> IProp GF) :=
+    uncurry <| uncurry <| @twp.pre hlc Expr State Obs Val Λ GF ι s (curry <| curry wp)
+
+instance (s : Stuckness) [OFE CoPset] [OFE Expr]
+    : BIMonoPred (@twp.pre' hlc Expr State Obs Val Λ GF ι s) := by
+  apply mono_pred'
+  unfold twp.pre' Function.curry Function.uncurry twp.pre
+  sorry

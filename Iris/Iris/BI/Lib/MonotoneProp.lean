@@ -24,19 +24,19 @@ structure BIAntiProp [BI PROP] (F : PROP → PROP) where
 section monotone
 
 @[fun_prop]
-def monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
+theorem monotone_const [BI PROP] (R : PROP) : BIMonoProp (λ_ => R) where
   mono_prop {P Q} := by
     iintro - HR
     iexact HR
 
 @[fun_prop]
-def monotone_id [BI PROP] : BIMonoProp (λR : PROP => R) where
+theorem monotone_id [BI PROP] : BIMonoProp (λR : PROP => R) where
   mono_prop {P Q} := by
     iintro #H
     iexact H
 
 @[fun_prop]
-def monotone_comp [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_comp [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIMonoProp G) : BIMonoProp (λP : PROP => F (G P)) where
   mono_prop {P Q} := by
     iintro #H
@@ -46,7 +46,7 @@ def monotone_comp [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     iexact H
 
 @[fun_prop]
-def monotone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem monotone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIAntiProp G) : BIMonoProp (λP : PROP => F (G P)) where
   mono_prop {P Q} := by
     iintro #H
@@ -58,7 +58,7 @@ def monotone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
 -- TODO: monotone_pure
 
 @[fun_prop]
-def monotone_and [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_and [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIMonoProp G) : BIMonoProp (λP : PROP => iprop(F P ∧ G P)) where
   mono_prop {P Q} := by
     iintro #H1 H2
@@ -71,7 +71,7 @@ def monotone_and [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
       · iexact H2
 
 @[fun_prop]
-def monotone_or [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_or [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIMonoProp G) : BIMonoProp (λP : PROP => iprop(F P ∨ G P)) where
   mono_prop {P Q} := by
     iintro #H1 (HF | HG)
@@ -87,7 +87,7 @@ def monotone_or [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
 -- TODO: monotone_imp
 
 @[fun_prop]
-def monotone_forall [BI PROP] (F : A → PROP → PROP)
+theorem monotone_forall [BI PROP] (F : A → PROP → PROP)
     (hf : ∀x, BIMonoProp (F x)) : BIMonoProp (λP : PROP => iprop(∀x, F x P)) where
   mono_prop {P Q} := by
     iintro #H1 H2 %a
@@ -96,7 +96,7 @@ def monotone_forall [BI PROP] (F : A → PROP → PROP)
     · iexact H2
 
 @[fun_prop]
-def monotone_exists [BI PROP] (F : A → PROP → PROP)
+theorem monotone_exists [BI PROP] (F : A → PROP → PROP)
     (hf : ∀x, BIMonoProp (F x)) : BIMonoProp (λP : PROP => iprop(∃x, F x P)) where
   mono_prop {P Q} := by
     iintro #H1 ⟨%x, H2⟩
@@ -106,7 +106,7 @@ def monotone_exists [BI PROP] (F : A → PROP → PROP)
     · iexact H2
 
 @[fun_prop]
-def monotone_sep [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem monotone_sep [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIMonoProp G) : BIMonoProp (λP : PROP => iprop(F P ∗ G P)) where
   mono_prop {P Q} := by
     iintro #H1 ⟨HF, HG⟩
@@ -119,7 +119,7 @@ def monotone_sep [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
       · iexact HG
 
 @[fun_prop]
-def monotone_wand [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem monotone_wand [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIMonoProp G) : BIMonoProp (λP : PROP => iprop(F P -∗ G P)) where
   mono_prop {P Q} := by
     iintro #H1 H2 HF
@@ -155,13 +155,13 @@ end monotone
 section antitone
 
 @[fun_prop]
-def antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
+theorem antitone_const [BI PROP] (R : PROP) : BIAntiProp (λ_ => R) where
   anti_prop {P Q} := by
     iintro - HR
     iexact HR
 
 @[fun_prop]
-def antitone_comp [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_comp [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIMonoProp G) : BIAntiProp (λP : PROP => F (G P)) where
   anti_prop {P Q} := by
     iintro #H
@@ -171,7 +171,7 @@ def antitone_comp [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     iexact H
 
 @[fun_prop]
-def antitone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem antitone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIAntiProp G) : BIAntiProp (λP : PROP => F (G P)) where
   anti_prop {P Q} := by
     iintro #H
@@ -183,7 +183,7 @@ def antitone_comp' [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
 -- TODO: antitone_pure
 
 @[fun_prop]
-def antitone_and [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_and [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIAntiProp G) : BIAntiProp (λP : PROP => iprop(F P ∧ G P)) where
   anti_prop {P Q} := by
     iintro #H1 H2
@@ -196,7 +196,7 @@ def antitone_and [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
       · iexact H2
 
 @[fun_prop]
-def antitone_or [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_or [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIAntiProp G) : BIAntiProp (λP : PROP => iprop(F P ∨ G P)) where
   anti_prop {P Q} := by
     iintro #H1 (HF | HG)
@@ -212,7 +212,7 @@ def antitone_or [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
 -- TODO: antitone_imp
 
 @[fun_prop]
-def antitone_forall [BI PROP] (F : A → PROP → PROP)
+theorem antitone_forall [BI PROP] (F : A → PROP → PROP)
     (hf : ∀x, BIAntiProp (F x)) : BIAntiProp (λP : PROP => iprop(∀x, F x P)) where
   anti_prop {P Q} := by
     iintro #H1 H2 %a
@@ -221,7 +221,7 @@ def antitone_forall [BI PROP] (F : A → PROP → PROP)
     · iexact H2
 
 @[fun_prop]
-def antitone_exists [BI PROP] (F : A → PROP → PROP)
+theorem antitone_exists [BI PROP] (F : A → PROP → PROP)
     (hf : ∀x, BIAntiProp (F x)) : BIAntiProp (λP : PROP => iprop(∃x, F x P)) where
   anti_prop {P Q} := by
     iintro #H1 ⟨%x, H2⟩
@@ -231,7 +231,7 @@ def antitone_exists [BI PROP] (F : A → PROP → PROP)
     · iexact H2
 
 @[fun_prop]
-def antitone_sep [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_sep [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
     (hg : BIAntiProp G) : BIAntiProp (λP : PROP => iprop(F P ∗ G P)) where
   anti_prop {P Q} := by
     iintro #H1 ⟨HF, HG⟩
@@ -244,7 +244,7 @@ def antitone_sep [BI PROP] (F G : PROP → PROP) (hf : BIAntiProp F)
       · iexact HG
 
 @[fun_prop]
-def antitone_wand [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
+theorem antitone_wand [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
     (hg : BIAntiProp G) : BIAntiProp (λP : PROP => iprop(F P -∗ G P)) where
   anti_prop {P Q} := by
     iintro #H1 H2 HF
@@ -256,7 +256,7 @@ def antitone_wand [BI PROP] (F G : PROP → PROP) (hf : BIMonoProp F)
       · iexact HF
 
 @[fun_prop]
-def antitone_persistently [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_persistently [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
     : BIAntiProp (λP : PROP => iprop(<pers> F P)) where
   anti_prop {P Q} := by
     iintro #H1 #HF
@@ -266,7 +266,7 @@ def antitone_persistently [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
     · iexact HF
 
 @[fun_prop]
-def antitone_later [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
+theorem antitone_later [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
     : BIAntiProp (λP : PROP => iprop(▷ F P)) where
   anti_prop {P Q} := by
     iintro #H1 HP
@@ -276,3 +276,98 @@ def antitone_later [BI PROP] (F : PROP → PROP) (hf : BIAntiProp F)
     · iexact HP
 
 end antitone
+
+section tactic
+
+open Lean Meta Expr Elab Tactic
+
+elab "monopropstep" : tactic =>
+  Lean.Elab.Tactic.withMainContext do
+    let goal ← Lean.Elab.Tactic.getMainGoal
+    let goalDecl ← goal.getDecl
+    let goalType := goalDecl.type
+
+    if not goalType.isApp then throwError "isn't function application"
+
+    goalType.withApp fun gFn gArgs => do
+      if gFn.isConstOf ``BIMonoProp then
+        let PROP := gArgs[0]!
+        let BI := gArgs[1]!
+        let f := gArgs[2]!
+        let body := f.getLambdaBody
+
+        if body.isApp then body.withApp fun fn args => do
+          if fn.isConstOf ``BI.and then
+            let p := args[2]!
+            let q := args[3]!
+            let newF := .lam .anonymous PROP p .default
+            let newG := .lam .anonymous PROP q .default
+            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
+            let proof ← mkAppM ``monotone_and #[newF, newG, mvarF, mvarG]
+            goal.assign proof
+            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
+          else if fn.isConstOf ``BI.or then
+            let p := args[2]!
+            let q := args[3]!
+            let newF := .lam .anonymous PROP p .default
+            let newG := .lam .anonymous PROP q .default
+            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
+            let proof ← mkAppM ``monotone_or #[newF, newG, mvarF, mvarG]
+            goal.assign proof
+            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
+          else if fn.isConstOf ``BI.forall then
+            throwError "forall"
+          else if fn.isConstOf ``BI.exists then
+            throwError "exists"
+          else if fn.isConstOf ``BI.sep then
+            let p := args[2]!
+            let q := args[3]!
+            let newF := .lam .anonymous PROP p .default
+            let newG := .lam .anonymous PROP q .default
+            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
+            let proof ← mkAppM ``monotone_sep #[newF, newG, mvarF, mvarG]
+            goal.assign proof
+            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
+          else if fn.isConstOf ``BI.wand then
+            let p := args[2]!
+            let q := args[3]!
+            let newF := .lam .anonymous PROP p .default
+            let newG := .lam .anonymous PROP q .default
+            let mvarF ← mkFreshExprMVar (← mkAppM ``BIAntiProp #[newF])
+            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
+            let proof ← mkAppM ``monotone_wand #[newF, newG, mvarF, mvarG]
+            goal.assign proof
+            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
+          else if fn.isConstOf ``BI.persistently then
+            let p := args[2]!
+            let newF := .lam .anonymous PROP p .default
+            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let proof ← mkAppM ``monotone_persistently #[newF, mvar]
+            goal.assign proof
+            replaceMainGoal [mvar.mvarId!]
+          else if fn.isConstOf ``BI.later then
+            let p := args[2]!
+            let newF := .lam .anonymous PROP p .default
+            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
+            let proof ← mkAppM ``monotone_later #[newF, mvar]
+            goal.assign proof
+            replaceMainGoal [mvar.mvarId!]
+        else if let .bvar 0 := body then
+          let proof ← mkAppOptM ``monotone_id #[PROP, BI]
+          goal.assign proof
+        if not (body.hasLooseBVar 0) then
+          let proof ← mkAppOptM ``monotone_const #[PROP, BI, body]
+          goal.assign proof
+      else
+        throwError "not BIMono"
+
+macro "monoprop" : tactic =>
+  `(tactic| repeat monopropstep)
+
+example [BI PROP] : BIMonoProp (λP : PROP => iprop((▷ <pers> P) ∗ True)) := by
+  monoprop
+
+end tactic

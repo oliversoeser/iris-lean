@@ -23,6 +23,10 @@ class BIMonoPred' [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
 export BIMonoPred' (mono_pred mono_pred_ne)
 attribute [instance] BIMonoPred'.mono_pred_ne
 
+theorem mono_pred' [BI PROP] [OFE A] {F : (A → PROP) → (A → PROP)} (hf : BIMonoPred' F) : BIMonoPred F where
+  mono_pred := hf.mono_pred
+  mono_pred_ne := hf.mono_pred_ne
+
 @[fun_prop]
 class BIAntiPred [BI PROP] [OFE A] (F : (A → PROP) → (A → PROP)) where
   anti_pred {Φ Ψ : A → PROP} [NonExpansive Φ] [NonExpansive Ψ] :
