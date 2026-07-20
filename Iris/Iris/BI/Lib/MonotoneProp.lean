@@ -281,7 +281,7 @@ section tactic
 
 open Lean Meta Expr Elab Tactic
 
-meta def solveUnary (goal : MVarId) (lem : Name) (PROP p : Expr)
+private meta def solveUnary (goal : MVarId) (lem : Name) (PROP p : Expr)
     (pClass := ``BIMonoProp) : TacticM Unit := do
   let newF := Expr.lam .anonymous PROP p .default
   let mvarF ← mkFreshExprMVar (← mkAppM pClass #[newF])
@@ -289,7 +289,7 @@ meta def solveUnary (goal : MVarId) (lem : Name) (PROP p : Expr)
   goal.assign proof
   replaceMainGoal [mvarF.mvarId!]
 
-meta def solveBinary (goal : MVarId) (lem : Name) (PROP p q : Expr)
+private meta def solveBinary (goal : MVarId) (lem : Name) (PROP p q : Expr)
     (pClass := ``BIMonoProp) (qClass := ``BIMonoProp): TacticM Unit := do
   let newF := Expr.lam .anonymous PROP p .default
   let newG := Expr.lam .anonymous PROP q .default
@@ -329,13 +329,31 @@ elab "monopropstep" : tactic =>
         if not (body.hasLooseBVar 0) then
           let proof ← mkAppOptM ``monotone_const #[PROP, BI, body]
           goal.assign proof
+      else if gFn.isConstOf ``BIAntiProp then
+        let PROP := gArgs[0]!
+        let BI := gArgs[1]!
+        let f := gArgs[2]!
+        let body := f.getLambdaBody
+
+        if body.isApp then body.withApp fun fn args => do
+          match fn.constName with
+          | ``BI.and => solveBinary goal ``antitone_and PROP args[2]! args[3]! (pClass := ``BIAntiProp) (qClass := ``BIAntiProp)
+          | ``BI.or => solveBinary goal ``antitone_or PROP args[2]! args[3]! (pClass := ``BIAntiProp) (qClass := ``BIAntiProp)
+          | ``BI.sep => solveBinary goal ``antitone_sep PROP args[2]! args[3]! (pClass := ``BIAntiProp) (qClass := ``BIAntiProp)
+          | ``BI.wand => solveBinary goal ``antitone_wand PROP args[2]! args[3]! (pClass := ``BIMonoProp) (qClass := ``BIAntiProp)
+          | ``BI.persistently => solveUnary goal ``antitone_persistently PROP args[2]! (pClass := ``BIAntiProp)
+          | ``BI.later => solveUnary goal ``antitone_later PROP args[2]! (pClass := ``BIAntiProp)
+          | _ => pure ()
+        if not (body.hasLooseBVar 0) then
+          let proof ← mkAppOptM ``antitone_const #[PROP, BI, body]
+          goal.assign proof
       else
         throwError "not BIMono"
 
 macro "monoprop" : tactic =>
   `(tactic| repeat monopropstep)
 
-example [BI PROP] : BIMonoProp (λP : PROP => iprop((▷ <pers> P) ∗ True)) := by
+example [BI PROP] : BIMonoProp (λP : PROP => iprop((▷ <pers> (P -∗ True)) -∗ True)) := by
   monoprop
 
 end tactic
