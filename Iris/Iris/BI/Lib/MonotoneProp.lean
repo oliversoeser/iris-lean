@@ -281,6 +281,24 @@ section tactic
 
 open Lean Meta Expr Elab Tactic
 
+meta def solveUnary (goal : MVarId) (lem : Name) (PROP p : Expr)
+    (pClass := ``BIMonoProp) : TacticM Unit := do
+  let newF := Expr.lam .anonymous PROP p .default
+  let mvarF ← mkFreshExprMVar (← mkAppM pClass #[newF])
+  let proof ← mkAppM lem #[newF, mvarF]
+  goal.assign proof
+  replaceMainGoal [mvarF.mvarId!]
+
+meta def solveBinary (goal : MVarId) (lem : Name) (PROP p q : Expr)
+    (pClass := ``BIMonoProp) (qClass := ``BIMonoProp): TacticM Unit := do
+  let newF := Expr.lam .anonymous PROP p .default
+  let newG := Expr.lam .anonymous PROP q .default
+  let mvarF ← mkFreshExprMVar (← mkAppM pClass #[newF])
+  let mvarG ← mkFreshExprMVar (← mkAppM qClass #[newG])
+  let proof ← mkAppM lem #[newF, newG, mvarF, mvarG]
+  goal.assign proof
+  replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
+
 elab "monopropstep" : tactic =>
   Lean.Elab.Tactic.withMainContext do
     let goal ← Lean.Elab.Tactic.getMainGoal
@@ -297,64 +315,14 @@ elab "monopropstep" : tactic =>
         let body := f.getLambdaBody
 
         if body.isApp then body.withApp fun fn args => do
-          if fn.isConstOf ``BI.and then
-            let p := args[2]!
-            let q := args[3]!
-            let newF := .lam .anonymous PROP p .default
-            let newG := .lam .anonymous PROP q .default
-            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
-            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
-            let proof ← mkAppM ``monotone_and #[newF, newG, mvarF, mvarG]
-            goal.assign proof
-            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
-          else if fn.isConstOf ``BI.or then
-            let p := args[2]!
-            let q := args[3]!
-            let newF := .lam .anonymous PROP p .default
-            let newG := .lam .anonymous PROP q .default
-            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
-            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
-            let proof ← mkAppM ``monotone_or #[newF, newG, mvarF, mvarG]
-            goal.assign proof
-            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
-          else if fn.isConstOf ``BI.forall then
-            throwError "forall"
-          else if fn.isConstOf ``BI.exists then
-            throwError "exists"
-          else if fn.isConstOf ``BI.sep then
-            let p := args[2]!
-            let q := args[3]!
-            let newF := .lam .anonymous PROP p .default
-            let newG := .lam .anonymous PROP q .default
-            let mvarF ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
-            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
-            let proof ← mkAppM ``monotone_sep #[newF, newG, mvarF, mvarG]
-            goal.assign proof
-            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
-          else if fn.isConstOf ``BI.wand then
-            let p := args[2]!
-            let q := args[3]!
-            let newF := .lam .anonymous PROP p .default
-            let newG := .lam .anonymous PROP q .default
-            let mvarF ← mkFreshExprMVar (← mkAppM ``BIAntiProp #[newF])
-            let mvarG ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newG])
-            let proof ← mkAppM ``monotone_wand #[newF, newG, mvarF, mvarG]
-            goal.assign proof
-            replaceMainGoal [mvarF.mvarId!, mvarG.mvarId!]
-          else if fn.isConstOf ``BI.persistently then
-            let p := args[2]!
-            let newF := .lam .anonymous PROP p .default
-            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
-            let proof ← mkAppM ``monotone_persistently #[newF, mvar]
-            goal.assign proof
-            replaceMainGoal [mvar.mvarId!]
-          else if fn.isConstOf ``BI.later then
-            let p := args[2]!
-            let newF := .lam .anonymous PROP p .default
-            let mvar ← mkFreshExprMVar (← mkAppM ``BIMonoProp #[newF])
-            let proof ← mkAppM ``monotone_later #[newF, mvar]
-            goal.assign proof
-            replaceMainGoal [mvar.mvarId!]
+          match fn.constName with
+          | ``BI.and => solveBinary goal ``monotone_and PROP args[2]! args[3]!
+          | ``BI.or => solveBinary goal ``monotone_or PROP args[2]! args[3]!
+          | ``BI.sep => solveBinary goal ``monotone_sep PROP args[2]! args[3]!
+          | ``BI.wand => solveBinary goal ``monotone_wand PROP args[2]! args[3]! (pClass := ``BIAntiProp)
+          | ``BI.persistently => solveUnary goal ``monotone_persistently PROP args[2]!
+          | ``BI.later => solveUnary goal ``monotone_later PROP args[2]!
+          | _ => pure ()
         else if let .bvar 0 := body then
           let proof ← mkAppOptM ``monotone_id #[PROP, BI]
           goal.assign proof
