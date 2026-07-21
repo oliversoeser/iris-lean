@@ -38,9 +38,3 @@ def twp.pre (s : Stuckness) (wp : CoPset -> Expr -> (Val -> IProp GF) -> IProp G
 open Function in
 def twp.pre' (s : Stuckness) (wp : (CoPset × Expr) × (Val -> IProp GF) -> IProp GF) :=
     uncurry <| uncurry <| @twp.pre hlc Expr State Obs Val Λ GF ι s (curry <| curry wp)
-
-instance (s : Stuckness) [OFE CoPset] [OFE Expr]
-    : BIMonoPred (@twp.pre' hlc Expr State Obs Val Λ GF ι s) := by
-  apply mono_pred'
-  unfold twp.pre' Function.curry Function.uncurry twp.pre
-  sorry
