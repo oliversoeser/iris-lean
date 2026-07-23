@@ -74,10 +74,6 @@ elab "contractive" : tactic => do
     -- simplification step (applies Dist.rfl)
     if let some _ ← observing? (evalTactic <| ← `(tactic|simp)) then continue
 
-    let goal ← getMainGoal
-    let goalType ← goal.getType
-    dbg_trace goalType
-
     -- uses a OFE.Contractive instance, if available
     if ← distInstanceStep then continue
 
