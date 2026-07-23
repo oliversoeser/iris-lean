@@ -53,7 +53,7 @@ meta def distHypStep : TacticM Bool := do
               return
             catch _ =>
               continue
-      throwError "unable to find matching DistLater hypothesis"
+      throwError ""
     return true
   catch _ => return false
 
@@ -71,13 +71,13 @@ elab "contractive" : tactic => do
 
   -- main loop
   while ¬(← getUnsolvedGoals).isEmpty do
-    -- simplification step (applies Dist.rfl)
+    -- simplification step (includes application of Dist.rfl)
     if let some _ ← observing? (evalTactic <| ← `(tactic|simp)) then continue
 
-    -- uses a OFE.Contractive instance, if available
+    -- uses an OFE.Contractive instance
     if ← distInstanceStep then continue
 
-    -- applies a OFE.DistLater hypothesis
+    -- applies an OFE.DistLater hypothesis
     if ← distHypStep then continue
 
     -- applies a non-expansive lemma

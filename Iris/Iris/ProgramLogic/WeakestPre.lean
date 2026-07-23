@@ -136,25 +136,7 @@ theorem wp_contractive (s : Stuckness) E (e : Expr) (h : toVal e = none) :
   distLater_dist {n Φ₁ Φ₂} HΦ := by
     simp only [wp_unfold.to_eq]
     simp only [wp.pre, h]
-    refine BI.forall_ne fun σ₁ => ?_
-    refine BI.forall_ne fun ns => ?_
-    refine BI.forall_ne fun obs => ?_
-    refine BI.forall_ne fun obs' => ?_
-    refine BI.forall_ne fun nt => ?_
-    refine BI.wand_ne.ne .rfl ?_
-    refine BIFUpdate.ne.ne ?_
-    refine BI.sep_ne.ne .rfl ?_
-    refine BI.forall_ne fun e₂  => ?_
-    refine BI.forall_ne fun σ₂ => ?_
-    refine BI.forall_ne fun eₜ => ?_
-    refine BI.wand_ne.ne .rfl ?_
-    refine BI.wand_ne.ne .rfl ?_
-    refine step_fupdN_contractive.distLater_dist fun m n_m => ?_
-    refine BIFUpdate.ne.ne ?_
-    refine BI.sep_ne.ne .rfl ?_
-    refine BI.sep_ne.ne ?_ .rfl
-    refine wp_ne.ne ?_
-    exact HΦ m n_m
+    contractive
 
 @[rocq_alias wp_value_fupd']
 theorem wp_value_fupd' {s : Stuckness} {E} {Φ : Val → IProp GF} {v : Val} :
