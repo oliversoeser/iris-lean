@@ -13,65 +13,79 @@ open Lean Elab Tactic Meta Iris.Std
 
 meta def nonexpLemmas : MetaM (Array Name) := do
   let env ← getEnv
-  return nonexpExt.getState env
-
--- elab "nonexp" : tactic => do
---   let lemmas := (← nonexpLemmas).reverse
---   for lem in lemmas do
---     let lemmaIdent := mkIdent lem
---     try
---       dbg_trace f!"trying {lem}"
---       let tac ← `(tactic|apply $lemmaIdent:ident; try intros)
---       evalTactic tac
---       dbg_trace f!"succeeded with {lem}"
---       return
---     catch _ =>
---       continue
---   throwError "unable to find matching lemma"
+  return (nonexpExt.getState env).reverse
 
 meta def distIsForall (expr : Expr) : MetaM Bool := do
   expr.withApp <| λ _ distArgs =>
     distArgs[1]!.withApp <| λ ofeFn _ => do
       return ofeFn.getLambdaBody.getAppFn.isConstOf ``OFE.instForallOfOFEFun
 
-#check OFE.Dist
+meta def nonexpStep : TacticM Bool := do
+  for neLem in ← nonexpLemmas do
+    try
+      let tac ← `(tactic|apply $(mkIdent neLem):ident; try intros)
+      evalTactic tac
+      return true
+    catch _ =>
+      continue
+  return false
+
+meta def distInstanceStep : TacticM Bool := do
+  try
+    let tac ← `(tactic|apply $(mkIdent ``OFE.Contractive.distLater_dist); intro _ _)
+    evalTactic tac
+    return true
+  catch _ =>
+    return false
+
+meta def distHypStep : TacticM Bool := do
+  try
+    let goal ← getMainGoal
+    goal.withContext do
+      let ctx ← getLCtx
+      for decl? in ctx.decls do
+        if let some decl := decl? then
+          if decl.type.isAppOf ``OFE.DistLater then
+            let declIdent := mkIdent decl.userName
+            try
+              let tac ← `(tactic|apply $declIdent:ident; assumption)
+              evalTactic tac
+              return
+            catch _ =>
+              continue
+      throwError "unable to find matching DistLater hypothesis"
+    return true
+  catch _ => return false
+
 elab "contractive" : tactic => do
   -- intro hypotheses
   evalTactic <| ← `(tactic|intros)
 
   -- intro foralls within OFE.Dist
-  while ← distIsForall <| ← (← getMainGoal).getType do
+  while ← distIsForall <| ← getMainTarget do
     evalTactic <| ← `(tactic|intro)
 
   -- unfold function definition, if possible
-  let _ ← observing? ((← (← getMainGoal).getType).withApp <| λ _ gArgs => do
-    evalTactic <| ← `(tactic|unfold $(mkIdent gArgs[3]!.getAppFn.constName!)))
+  let _ ← observing? ((← getMainTarget).withApp <| λ _ gArgs => do
+    evalTactic <| ← `(tactic|unfold $(mkIdent gArgs[3]!.getAppFn.constName!); try split))
 
-  -- loop:
-  -- try OFE.Contractive.distLater_dist, if not already applied
-  -- try OFE.DistLater assumption
-  -- try non-expansive step
+  -- main loop
+  while ¬(← getUnsolvedGoals).isEmpty do
+    -- simplification step (applies Dist.rfl)
+    if let some _ ← observing? (evalTactic <| ← `(tactic|simp)) then continue
 
-  -- exit if all fail
+    let goal ← getMainGoal
+    let goalType ← goal.getType
+    dbg_trace goalType
 
+    -- uses a OFE.Contractive instance, if available
+    if ← distInstanceStep then continue
 
-  -- let goal ← getMainGoal
-  -- goal.withContext do
-  --   let lemmaIdent := mkIdent ``OFE.Contractive.distLater_dist
-  --   try
-  --     let tac ← `(tactic|apply $lemmaIdent:ident; intro _ _)
-  --     evalTactic tac
-  --     return
-  --   catch _ =>
-  --     let ctx ← getLCtx
-  --     for decl? in ctx.decls do
-  --       if let some decl := decl? then
-  --         if decl.type.isAppOf ``OFE.DistLater then
-  --           let declIdent := mkIdent decl.userName
-  --           try
-  --             let tac ← `(tactic|apply $declIdent:ident; assumption)
-  --             evalTactic tac
-  --             return
-  --           catch _ =>
-  --             continue
-  --     throwError "unable to find matching DistLater hypothesis"
+    -- applies a OFE.DistLater hypothesis
+    if ← distHypStep then continue
+
+    -- applies a non-expansive lemma
+    if ← nonexpStep then continue
+
+    -- exit if all fail
+    break

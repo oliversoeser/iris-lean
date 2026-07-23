@@ -81,9 +81,7 @@ def wp.pre (s : Stuckness) (wp : CoPset -> Expr -> (Val -> IProp GF) -> IProp GF
 
 @[rocq_alias wp_pre_contractive]
 instance wp.pre.contractive s : OFE.Contractive (wp.pre s (ι := ι)) where
-  distLater_dist := by
-    contractive
-    sorry
+  distLater_dist := by contractive
 
 @[rocq_alias wp_def]
 instance wp.def : Wp (IProp GF) (Expr) (Val) Stuckness where
