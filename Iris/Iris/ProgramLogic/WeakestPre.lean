@@ -11,6 +11,7 @@ public import Iris.BI.WeakestPre
 public import Iris.ProofMode
 public import Iris.ProgramLogic.Language
 public import Iris.Std.CoPset
+public import Iris.ProofMode.Tactics.Contractive
 
 namespace Iris
 
@@ -81,34 +82,11 @@ def wp.pre (s : Stuckness) (wp : CoPset -> Expr -> (Val -> IProp GF) -> IProp GF
 @[rocq_alias wp_pre_contractive]
 instance wp.pre.contractive s : OFE.Contractive (wp.pre s (ι := ι)) where
   distLater_dist := by
-    intros n wp wp' Hwp E e₁ Φ
+    intros
+    intro _ _ _
     unfold pre
-    cases toVal e₁
-    case some _ =>
-      exact .rfl
-    case none =>
-      refine BI.forall_ne (fun σ₁ => ?_)
-      refine BI.forall_ne (fun ns => ?_)
-      refine BI.forall_ne (fun obs => ?_)
-      refine BI.forall_ne (fun obs' => ?_)
-      refine BI.forall_ne (fun nt => ?_)
-      refine BI.wand_ne.ne .rfl ?_
-      refine BIFUpdate.ne.ne ?_
-      refine BI.sep_ne.ne .rfl ?_
-      refine BI.forall_ne (fun e₂  => ?_)
-      refine BI.forall_ne (fun σ₂ => ?_)
-      refine BI.forall_ne (fun eₜ => ?_)
-      refine BI.wand_ne.ne .rfl ?_
-      refine BI.wand_ne.ne .rfl ?_
-      refine BIFUpdate.ne.ne ?_
-      refine OFE.Contractive.distLater_dist fun m m_n => ?_
-      refine BIFUpdate.ne.ne ?_
-      refine step_fupdN_ne.ne ?_
-      refine BIFUpdate.ne.ne ?_
-      refine BI.sep_ne.ne .rfl ?_
-      refine BI.sep_ne.ne ?_ ?_
-      · exact Hwp m m_n _ _ _
-      · exact BI.BigSepL.bigSepL_dist <| fun _ => Hwp m m_n _ _ _
+    split
+    repeat' (first | contractive | nonexp)
 
 @[rocq_alias wp_def]
 instance wp.def : Wp (IProp GF) (Expr) (Val) Stuckness where

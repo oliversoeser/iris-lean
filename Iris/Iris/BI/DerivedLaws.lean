@@ -157,7 +157,7 @@ theorem imp_congr_left [BI PROP] {P P' Q : PROP} (h : P ⊣⊢ P') : (P → Q) �
 theorem imp_congr_right [BI PROP] {P Q Q' : PROP} (h : Q ⊣⊢ Q') : (P → Q) ⊣⊢ (P → Q') :=
   imp_congr .rfl h
 
-@[rocq_alias bi.forall_ne]
+@[rocq_alias bi.forall_ne, non_exp]
 theorem forall_ne [BI PROP] {Φ Ψ : α → PROP} (h : ∀ a, Φ a ≡{n}≡ Ψ a) :
     iprop(∀ a, Φ a) ≡{n}≡ iprop(∀ a, Ψ a) := sForall_ne <| by
   constructor <;> rintro _ ⟨a, rfl⟩ <;> exact ⟨_, ⟨a, rfl⟩, h _⟩
@@ -182,7 +182,7 @@ theorem forall_mono [BI PROP] {Φ Ψ : α → PROP} (h : ∀ a, Φ a ⊢ Ψ a) :
 theorem forall_congr [BI PROP] {Φ Ψ : α → PROP} (h : ∀ a, Φ a ⊣⊢ Ψ a) : (∀ a, Φ a) ⊣⊢ ∀ a, Ψ a :=
   ⟨forall_mono fun a => (h a).1, forall_mono fun a => (h a).2⟩
 
-@[rocq_alias bi.exist_ne]
+@[rocq_alias bi.exist_ne, non_exp]
 theorem exists_ne [BI PROP] {Φ Ψ : α → PROP} (h : ∀ a, Φ a ≡{n}≡ Ψ a) :
     iprop(∃ a, Φ a) ≡{n}≡ iprop(∃ a, Ψ a) := sExists_ne <| by
   constructor <;> rintro _ ⟨a, rfl⟩ <;> exact ⟨_, ⟨a, rfl⟩, h _⟩
@@ -612,7 +612,7 @@ instance iff_ne [BI PROP] : OFE.NonExpansive₂ (BIBase.iff (PROP := PROP)) :=
 theorem iff_refl_alias [BI PROP] {Q P : PROP} : Q ⊢ iprop(P ↔ P) :=
   true_intro.trans <| and_intro (imp_intro and_elim_r) (imp_intro and_elim_r)
 
-@[rocq_alias bi.wand_iff_ne]
+@[rocq_alias bi.wand_iff]
 instance wandIff_ne [BI PROP] : OFE.NonExpansive₂ (wandIff (PROP := PROP)) :=
   ⟨fun {_ _ _} h₁ {_ _} h₂ => and_ne.ne (wand_ne.ne h₁ h₂) (wand_ne.ne h₂ h₁)⟩
 #rocq_ignore bi.wand_iff_proper "Derivable from _ne with NonExpansive.eqv."
@@ -722,7 +722,7 @@ theorem pure_alt {PROP : Type _} [BI PROP] (φ : Prop) :
 
 /-! # Affine -/
 
-@[rocq_alias bi.affinely_ne]
+@[rocq_alias bi.affinely_ne, instance]
 theorem affinely_ne [BI PROP] : OFE.NonExpansive (@affinely PROP _) where
   ne _ _ _ h := and_ne.1 .rfl h
 #rocq_ignore bi.affinely_flip_mono' "Use _mono."
@@ -855,7 +855,7 @@ instance [BIBase PROP] : Inhabited PROP where
 
 /-! # Absorbing -/
 
-@[rocq_alias bi.absorbingly_ne]
+@[rocq_alias bi.absorbingly_ne, instance]
 theorem absorbingly_ne [BI PROP] : OFE.NonExpansive (@absorbingly PROP _) where
   ne _ _ _ h := sep_ne.1 .rfl h
 #rocq_ignore bi.absorbingly_flip_mono' "Use _mono."
@@ -1375,7 +1375,7 @@ instance absorbingly_persistent [BI PROP] (P : PROP) [Persistent P] :
 
 /-! # The intuitionistic modality -/
 
-@[rocq_alias bi.intuitionistically_ne]
+@[rocq_alias bi.intuitionistically, instance]
 theorem intuitionistically_ne [BI PROP] : OFE.NonExpansive (@intuitionistically PROP _) where
   ne _ _ _ h := affinely_ne.1 (persistently_ne.1 h)
 #rocq_ignore bi.intuitionistically_flip_mono' "Use _mono."
@@ -1539,7 +1539,7 @@ theorem intuitionistically_into_persistently [BI PROP] {P : PROP} [BIAffine PROP
 @[simp] theorem affinelyIf_true [BI PROP] (P : PROP) :
     iprop(<affine>?true P) = iprop(<affine> P) := rfl
 
-@[rocq_alias bi.affinely_if_ne]
+@[rocq_alias bi.affinely_if_ne, instance]
 theorem affinelyIf_ne {p : Bool} [BI PROP] : OFE.NonExpansive (affinelyIf (PROP := PROP) p) :=
   match p with
   | true => affinely_ne
@@ -1679,7 +1679,7 @@ theorem affinelyIf_and_left_right {p : Bool} [BI PROP] {P Q : PROP} :
 @[simp] theorem absorbinglyIf_true [BI PROP] (P : PROP) :
     iprop(<absorb>?true P) = iprop(<absorb> P) := rfl
 
-@[rocq_alias bi.absorbingly_if_ne]
+@[rocq_alias bi.absorbingly_if_ne, instance]
 theorem absorbinglyIf_ne {p : Bool} [BI PROP] : OFE.NonExpansive (absorbinglyIf (PROP := PROP) p) :=
   match p with
   | true => absorbingly_ne
@@ -1822,7 +1822,7 @@ theorem affinely_if_absorbingly_if_elim [BI PROP] {p : Bool} {P : PROP} [BIPosit
 @[simp] theorem persistentlyIf_true [BI PROP] (P : PROP) :
     iprop(<pers>?true P) = iprop(<pers> P) := rfl
 
-@[rocq_alias bi.persistently_if_ne]
+@[rocq_alias bi.persistently_if_ne, instance]
 theorem persistentlyIf_ne {p : Bool} [BI PROP] :
     OFE.NonExpansive (persistentlyIf (PROP := PROP) p) :=
   match p with
@@ -1923,7 +1923,7 @@ theorem persistentlyIf_intutitionistically {p : Bool} [BI PROP] {P : PROP} :
 @[simp] theorem intuitionisticallyIf_false' [BI PROP] (P : PROP) : iprop(□?false P) = P := rfl
 @[simp] theorem intuitionisticallyIf_true [BI PROP] (P : PROP) : iprop(□?true P) = iprop(□ P) := rfl
 
-@[rocq_alias bi.intuitionistically_if_ne]
+@[rocq_alias bi.intuitionistically_if_ne, instance]
 theorem intuitionisticallyIf_ne {p : Bool} [BI PROP] :
     OFE.NonExpansive (intuitionisticallyIf (PROP := PROP) p) :=
   match p with

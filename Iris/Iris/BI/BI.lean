@@ -86,6 +86,15 @@ namespace BI
 
 attribute [instance] BI.entails_preorder
 
+attribute [instance] and_ne
+attribute [instance] or_ne
+attribute [instance] imp_ne
+attribute [non_exp] sForall_ne
+attribute [non_exp] sExists_ne
+attribute [instance] sep_ne
+attribute [instance] wand_ne
+attribute [instance] persistently_ne
+
 theorem BIBase.Entails.trans [BI PROP] {P Q R : PROP} (h1 : P ⊢ Q) (h2 : Q ⊢ R) : P ⊢ R :=
   Transitive.trans h1 h2
 
