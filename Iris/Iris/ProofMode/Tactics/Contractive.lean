@@ -7,7 +7,7 @@ module
 
 public meta import Iris.Algebra.OFE
 
-namespace Iris.ProofMode
+namespace Iris
 
 open Lean Elab Tactic Meta Iris.Std
 

@@ -11,7 +11,7 @@ public import Iris.BI.WeakestPre
 public import Iris.ProofMode
 public import Iris.ProgramLogic.Language
 public import Iris.Std.CoPset
-public import Iris.ProofMode.Tactics.Contractive
+public import Iris.Std.Guarded
 
 namespace Iris
 
